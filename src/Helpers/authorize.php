@@ -1,22 +1,44 @@
 <?php
 
-if (!function_exists('policy_authorization')) {
-    function policy_authorization($user, string $ability, \Illuminate\Database\Eloquent\Model|null $model = null): bool
-    {
-        if ($user->role->isReserved()) return true;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
-        $permissions = $user->role->permission->permissions ?? [];
-        if (in_array($ability, $permissions)) return true;
+if (!function_exists('policy_authorization')) {
+    /**
+     * @param Model      $user
+     * @param string     $ability
+     * @param Model|null $model
+     *
+     * @return bool
+     */
+    function policy_authorization(Model $user, string $ability, ?Model $model = null): bool
+    {
+        if ($user->role->isReserved()) {
+            return true;
+        }
+        if (in_array($ability, $user->role->permission->permissions ?? [])) {
+            return true;
+        }
 
         return false;
     }
 }
 
 if (!function_exists('gate_allows')) {
-    function gate_allows(string $ability, $parameters = [], $user = null): bool
+    /**
+     * @param string                                                $ability
+     * @param mixed                                                 $parameters
+     * @param Authenticatable|Model|null $user
+     *
+     * @return bool
+     */
+    function gate_allows(string $ability, $parameters = [], ?Model $user = null): bool
     {
         $user = get_user($user);
-
         return isset($user)
             ? Gate::forUser($user)->allows($ability, $parameters)
             : Gate::allows($ability, $parameters);
@@ -24,10 +46,17 @@ if (!function_exists('gate_allows')) {
 }
 
 if (!function_exists('gate_authorize')) {
-    function gate_authorize(string $ability, $parameters = [], $user = null): \Illuminate\Auth\Access\Response
+    /**
+     * @param string                                                $ability
+     * @param mixed                                                 $parameters
+     * @param Authenticatable|Model|null $user
+     *
+     * @return Response
+     * @throws AuthorizationException
+     */
+    function gate_authorize(string $ability, $parameters = [], ?Model $user = null): Response
     {
         $user = get_user($user);
-
         return isset($user)
             ? Gate::forUser($user)->authorize($ability, $parameters)
             : Gate::authorize($ability, $parameters);
@@ -35,8 +64,23 @@ if (!function_exists('gate_authorize')) {
 }
 
 if (!function_exists('gate_allows_redirect')) {
-    function gate_allows_redirect(string $ability, $parameters = [], $user = null, string $route = 'dashboard'): ?\Illuminate\Http\RedirectResponse
+    /**
+     * @param string                                                $ability
+     * @param mixed                                                 $parameters
+     * @param Authenticatable|Model|null $user
+     * @param string                                                $route
+     *
+     * @return RedirectResponse|bool
+     */
+    function gate_allows_redirect(string $ability, $parameters = [], ?Model $user = null, string $route = 'dashboard'): RedirectResponse
     {
-        return gate_allows($ability, $parameters, $user) ? null : redirect()->route($route)->with('danger', __('Unauthorized request'));
+        $allows = gate_allows($ability, $parameters, $user);
+        if ($allows) {
+            return false;
+        }
+
+        return redirect(
+            filter_var($route, FILTER_VALIDATE_URL) ? $route : route($route)
+        )->with('danger', __('Unauthorized request'));
     }
 }

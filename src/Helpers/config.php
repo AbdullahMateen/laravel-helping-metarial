@@ -1,62 +1,99 @@
 <?php
 
 if (!function_exists('app_name')) {
-    function app_name(): string
+    /**
+     * @param string $default
+     *
+     * @return string
+     */
+    function app_name(string $default = 'Website'): string
     {
-        return config('app.name') ?? 'Website';
+        return config('app.name', $default);
     }
 }
 
 if (!function_exists('app_full_name')) {
-    function app_full_name(): string
+    /**
+     * @param string $default
+     *
+     * @return string
+     */
+    function app_full_name(string $default = 'Website'): string
     {
-        return config('app.full_name') ?? 'Website';
+        return config('app.full_name', $default);
     }
 }
 
 if (!function_exists('app_company_name')) {
-    function app_company_name(): string
+    /**
+     * @param string $default
+     *
+     * @return string
+     */
+    function app_company_name(string $default = 'Website'): string
     {
-        return config('app.company_name') ?? 'Website';
+        return config('app.company_name', $default);
     }
 }
 
 if (!function_exists('app_url')) {
-    function app_url(string|null $path = null): string
+    /**
+     * @param string|null $path
+     *
+     * @return string
+     */
+    function app_url(?string $path = null): string
     {
         $url = rtrim(config('app.url'), '/');
-        if (isset($path)) $url = $url . '/' . ltrim($path, '/');
-        return $url;
+        return isset($path) ? sprintf("$url/%s", ltrim($path, '/')) : $url;
     }
 }
 
 if (!function_exists('app_asset_url')) {
-    function app_asset_url(string|null $path = null): string
+    /**
+     * @param string|null $path
+     *
+     * @return string
+     */
+    function app_asset_url(?string $path = null): string
     {
-        $url = config('app.asset_url') ?? app_url();
-        $url = rtrim($url, '/');
-        if (isset($path)) $url = $url . '/' . ltrim($path, '/');
-        return $url;
+        $url = rtrim(config('app.asset_url') ?? app_url(), '/');
+        return isset($path) ? sprintf("$url/%s", ltrim($path, '/')) : $url;
     }
 }
 
 if (!function_exists('app_domain')) {
-    function app_domain(): string
+    /**
+     * @param string $default
+     *
+     * @return string
+     */
+    function app_domain(string $default = '127.0.0.1:8000'): string
     {
-        return config('app.domain') ?? 'localhost';
+        return config('app.domain', $default);
     }
 }
 
 if (!function_exists('app_timezone')) {
-    function app_timezone(): string
+    /**
+     * @param string $default
+     *
+     * @return string
+     */
+    function app_timezone(string $default = 'UTC'): string
     {
-        return config('app.timezone') ?? 'UTC';
+        return config('app.timezone', $default);
     }
 }
 
-if (!function_exists('app_local')) {
-    function app_local(): string
+if (!function_exists('app_locale')) {
+    /**
+     * @param string $default
+     *
+     * @return string
+     */
+    function app_locale(string $default = 'en'): string
     {
-        return config('app.locale') ?? 'en';
+        return config('app.locale', $default);
     }
 }
