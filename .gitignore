@@ -1,0 +1,17 @@
+vendor/
+node_modules/
+
+composer.lock
+package-lock.json
+
+_ide_helper.php
+.phpstorm.meta.php
+
+.idea
+.vscode
+.vscode/*
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

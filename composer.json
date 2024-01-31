@@ -1,0 +1,42 @@
+{
+    "name": "abdul/laravel-helping-metarial",
+    "description": "Laravel helper functions and general helping material",
+    "keywords": ["laravel", "helpers"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Abdullah Mateen",
+            "email": "abdullahmateen101@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.2.0|^8.0",
+        "illuminate/support": "~5.8.0|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0"
+    },
+    "require-dev": {
+        "laravel/framework": "^7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Abdul\\LaravelHelpingMaterial\\": "src/"
+        },
+        "files": [
+            "src/Helpers/helpers.php"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Abdul\\LaravelHelpingMaterial\\LaravelHelpingMaterialServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
