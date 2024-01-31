@@ -1,5 +1,5 @@
 {
-    "name": "abdul/laravel-helping-metarial",
+    "name": "AbdullahMateen/laravel-helping-metarial",
     "description": "Laravel helper functions and general helping material",
     "keywords": ["laravel", "helpers"],
     "type": "library",
@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Abdul\\LaravelHelpingMaterial\\": "src/"
+            "AbdullahMateen\\LaravelHelpingMaterial\\": "src/"
         },
         "files": [
             "src/Helpers/helpers.php"
@@ -28,7 +28,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Abdul\\LaravelHelpingMaterial\\LaravelHelpingMaterialServiceProvider"
+                "AbdullahMateen\\LaravelHelpingMaterial\\LaravelHelpingMaterialServiceProvider"
             ]
         }
     },

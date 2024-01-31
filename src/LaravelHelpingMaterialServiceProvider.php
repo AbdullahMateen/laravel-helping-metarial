@@ -1,6 +1,6 @@
 <?php
 
-namespace Abdul\LaravelHelpingMaterial;
+namespace AbdullahMateen\LaravelHelpingMaterial;
 
 use Illuminate\Support\ServiceProvider;
 
