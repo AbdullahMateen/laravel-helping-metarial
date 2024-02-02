@@ -5,93 +5,153 @@ use Carbon\CarbonPeriod;
 
 if (!function_exists('now_now')) {
     /**
-     * @param string|null $timezone
+     * @param string $timezone
      *
      * @return Carbon
      */
-    function now_now(?string $timezone = null): Carbon
+    function now_now(string $timezone = 'UTC'): Carbon
     {
-        return now($timezone ?? app_timezone());
+        return now(app_timezone($timezone));
     }
 }
 
 if (!function_exists('get_date_periods_between')) {
     /**
-     * @param $startDate
-     * @param $endDate
-     * @param $format
+     * @param Carbon|string      $startDate
+     * @param Carbon|string|null $endDate
+     * @param string             $format
      *
-     * @return CarbonPeriod
+     * @return array
      */
-    function get_date_periods_between($startDate, $endDate = null, $format = 'd M'): CarbonPeriod
+    function get_date_periods_between($startDate, $endDate = null, string $format = 'd M'): array
     {
         $endDate = $endDate ?? now();
 
-        $periods = CarbonPeriod::create($startDate, $endDate);
-        foreach ($periods as $index => $date) {
-            $periods[$index] = $date->format($format);
-        }
-        return $periods;
+        $periods     = CarbonPeriod::create($startDate, $endDate);
+        $datePeriods = [];
+        foreach ($periods as $date) $datePeriods[] = $date->format($format);
+        return $datePeriods;
+    }
+}
+
+if (!function_exists('is_datetime_between')) {
+    /**
+     * @param Carbon|string|null $start
+     * @param Carbon|string|null $end
+     * @param Carbon|string|null $date
+     * @param bool               $includeBorderDates
+     * @param bool               $includeTime
+     * @param string             $timezone
+     *
+     * @return bool
+     */
+    function is_datetime_between($start, $end, $date = null, bool $includeBorderDates = true, bool $includeTime = true, string $timezone = 'UTC'): bool
+    {
+        if (!isset($start, $end)) return false;
+
+        $timezone = app_timezone($timezone);
+        $format   = $includeTime ? 'Y-m-d H:i:s' : 'Y-m-d';
+
+        $date      = Carbon::parse($date ?? now_now($timezone))->format($format);
+        $startDate = Carbon::parse($start, $timezone)->format($format);
+        $endDate   = Carbon::parse($end, $timezone)->format($format);
+
+        return $includeBorderDates
+            ? (new Carbon($date))->betweenIncluded($startDate, $endDate)
+            : (new Carbon($date))->betweenExcluded($startDate, $endDate);
+    }
+}
+
+if (!function_exists('is_date_between')) {
+    /**
+     * @param Carbon|string $date
+     * @param Carbon|string $start
+     * @param Carbon|string $end
+     * @param string        $timezone
+     *
+     * @return bool
+     */
+    function is_date_between($date, $start, $end, string $timezone = 'UTC'): bool
+    {
+        return is_datetime_between($start, $end, $date, false, false, $timezone);
     }
 }
 
 if (!function_exists('is_today_between')) {
-    function is_today_between($start, $end, $timezone = null)
+    /**
+     * @param Carbon|string $start
+     * @param Carbon|string $end
+     * @param string        $timezone
+     *
+     * @return bool
+     */
+    function is_today_between($start, $end, string $timezone = 'UTC'): bool
     {
-        try {
-            if (!isset($start, $end)) return false;
-            return Carbon::now($timezone ?? app_timezone())->between(
-                Carbon::parse($start, $timezone ?? app_timezone()),
-                Carbon::parse($end, $timezone ?? app_timezone())->addDay()->subSecond()
-            );
-        } catch (Exception $exception) {
-            return false;
-        }
+        return is_date_between(now_now($timezone), $start, $end, $timezone);
     }
 }
 
 if (!function_exists('display_datetime')) {
-    function display_datetime($dateTime = null, $format = 'l jS M, Y', $timezone = null, $formatType = '', $showTodayDefault = true)
+    /**
+     * @param Carbon|string|null $dateTime
+     * @param string             $format
+     * @param string             $timezone
+     * @param string             $formatType could be empty string or iso
+     * @param bool               $showTodayDefault
+     *
+     * @return string
+     */
+    function display_datetime($dateTime = null, string $format = 'l jS M, Y', string $timezone = 'UTC', string $formatType = '', bool $showTodayDefault = true): string
     {
-        $timezone = $timezone ?? app_timezone();
+        $timezone = app_timezone($timezone);
         if (!isset($dateTime) && $showTodayDefault) {
-            $date = now_now();
-            if (strtolower($formatType) === 'iso') return $date->isoFormat($format);
-            return $date->format($format);
+            $date = now_now($timezone);
+            return strtolower($formatType) === 'iso' ? $date->isoFormat($format) : $date->format($format);
         }
         if (is_numeric($dateTime)) {
-            $date = \Carbon\Carbon::createFromTimestamp($dateTime)->timezone($timezone);
-            if (strtolower($formatType) === 'iso') return $date->isoFormat($format);
-            return $date->format($format);
+            $date = Carbon::createFromTimestamp($dateTime, $timezone);
+            return strtolower($formatType) === 'iso' ? $date->isoFormat($format) : $date->format($format);
         }
         if (isset($dateTime)) {
-            $date = \Carbon\Carbon::parse($dateTime, $timezone)->timezone($timezone);
-            if (strtolower($formatType) === 'iso') return $date->isoFormat($format);
-            return $date->format($format);
+            $date = Carbon::parse($dateTime, $timezone);
+            return strtolower($formatType) === 'iso' ? $date->isoFormat($format) : $date->format($format);
         }
         return '';
     }
 }
 
 if (!function_exists('diff_for_humans')) {
-    function diff_for_humans($date, $timezone = null)
+    /**
+     * @param Carbon|string $date
+     * @param string        $timezone
+     *
+     * @return string
+     */
+    function diff_for_humans($date, string $timezone = 'UTC'): string
     {
-        $timezone = $timezone ?? app_timezone();
-
+        $timezone = app_timezone($timezone);
         return is_numeric($date)
-            ? Carbon::createFromTimestamp($date)->timezone($timezone)->diffForHumans()
-            : Carbon::parse($date)->timezone($timezone)->diffForHumans();
+            ? Carbon::createFromTimestamp($date, $timezone)->diffForHumans()
+            : Carbon::parse($date, $timezone)->diffForHumans();
     }
 }
 
 if (!function_exists('remaining_days_of_month')) {
-    function remaining_days_of_month($date = null, $useGivenDateEndOfMonth = false)
+    /**
+     * @param Carbon|string|null $date
+     * @param bool               $useGivenDateEndOfMonth
+     * @param string             $timezone
+     *
+     * @return int
+     */
+    function remaining_days_of_month($date = null, bool $useGivenDateEndOfMonth = false, string $timezone = 'UTC'): int
     {
         try {
-            $date       = Carbon::parse($date, app_timezone());
+            $timezone   = app_timezone($timezone);
+            $date       = Carbon::parse($date, $timezone);
             $endOfMonth = $useGivenDateEndOfMonth
-                ? Carbon::parse($date, app_timezone())->endOfMonth()
-                : Carbon::now(app_timezone())->endOfMonth();
+                ? Carbon::parse($date, $timezone)->endOfMonth()
+                : Carbon::now($timezone)->endOfMonth();
 
             if ($date->gt($endOfMonth)) return -1;
 
@@ -103,17 +163,21 @@ if (!function_exists('remaining_days_of_month')) {
 }
 
 if (!function_exists('days_between_dates')) {
-    function days_between_dates($dateTo, $dateFrom = null)
+    /**
+     * @param Carbon|string      $end
+     * @param Carbon|string|null $start
+     * @param string             $timezone
+     *
+     * @return int
+     */
+    function days_between_dates($end, $start = null, string $timezone = 'UTC'): int
     {
         try {
-            $dateTo   = Carbon::parse($dateTo, app_timezone());
-            $dateFrom = isset($dateFrom)
-                ? Carbon::parse($dateFrom, app_timezone())
-                : Carbon::now(app_timezone());
-
-            if ($dateFrom->gt($dateTo)) return -1;
-
-            return $dateFrom->diffInDays($dateTo);
+            $timezone = app_timezone($timezone);
+            $end      = Carbon::parse($end, $timezone);
+            $start    = isset($start) ? Carbon::parse($start, $timezone) : Carbon::now($timezone);
+            if ($start->gt($end)) return -1;
+            return $start->diffInDays($end);
         } catch (Exception $exception) {
             return -1;
         }
@@ -121,45 +185,30 @@ if (!function_exists('days_between_dates')) {
 }
 
 if (!function_exists('remaining_days_till')) {
-    function remaining_days_till($dateTo, $dateFrom = null)
+    /**
+     * @param Carbon|string      $end
+     * @param Carbon|string|null $start
+     * @param string             $timezone
+     *
+     * @return int
+     */
+    function remaining_days_till($end, $start = null, string $timezone = 'UTC'): int
     {
-        try {
-            $dateTo   = Carbon::parse($dateTo, app_timezone());
-            $dateFrom = isset($dateFrom)
-                ? Carbon::parse($dateFrom, app_timezone())
-                : Carbon::now(app_timezone());
-
-            if ($dateFrom->gt($dateTo)) return -1;
-
-            return $dateFrom->diffInDays($dateTo);
-        } catch (Exception $exception) {
-            return -1;
-        }
-    }
-}
-
-if (!function_exists('is_datetime_between')) {
-    function is_datetime_between($start, $end, $date = null, $includeBorderDates = true)
-    {
-        $date = \Carbon\Carbon::parse($date)->format('Y-m-d H:i:s') ?? now()->format('Y-m-d H:i');
-
-        $startDate = \Carbon\Carbon::parse($start)->format('Y-m-d H:i:s');
-        $endDate   = \Carbon\Carbon::parse($end)->format('Y-m-d H:i:s');
-        $check     = $includeBorderDates
-            ? (new \Carbon\Carbon($date))->betweenIncluded($startDate, $endDate)
-            : (new \Carbon\Carbon($date))->betweenExcluded($startDate, $endDate);
-
-        return $check;
+        return days_between_dates($end, $start, $timezone);
     }
 }
 
 if (!function_exists('days_in_month')) {
-    function days_in_month($date = null)
+    /**
+     * @param Carbon|string|null $date
+     * @param string             $timezone
+     *
+     * @return int
+     */
+    function days_in_month($date = null, string $timezone = 'UTC'): int
     {
         try {
-            return isset($date)
-                ? Carbon::parse($date, app_timezone())->daysInMonth
-                : Carbon::now(app_timezone())->daysInMonth;
+            return Carbon::parse($date ?? now_now(), app_timezone($timezone))->daysInMonth;
         } catch (Exception $exception) {
             return -1;
         }
