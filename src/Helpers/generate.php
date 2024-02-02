@@ -39,7 +39,7 @@ if (!function_exists('generate_password')) {
      */
     function generate_password(int $length = 12, string $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`-=~!@#$%^&*()_+,./<>?;:[]{}\|'): string
     {
-        $password = '';
+        $password  = '';
         $maxLength = strlen($chars) - 1;
 
         for ($i = 0; $i < $length; $i++) {
@@ -139,12 +139,12 @@ if (!function_exists('generate_gravatar')) {
     /**
      * Get either a Gravatar URL or complete image tag for a specified email address.
      *
-     * @param string $email The email address
+     * @param string     $email The email address
      * @param string|int $s     Size in pixels, defaults to 80px [ 1 - 2048 ]
-     * @param string $d     Default imageset to use [ 404 | mp | identicon | monsterid | wavatar | retro | robohash | blank ]
-     * @param string $r     Maximum rating (inclusive) [ g | pg | r | x ]
-     * @param bool   $img   True to return a complete IMG tag False for just the URL
-     * @param array  $attr  Optional, additional key/value attributes to include in the IMG tag
+     * @param string     $d     Default imageset to use [ 404 | mp | identicon | monsterid | wavatar | retro | robohash | blank ]
+     * @param string     $r     Maximum rating (inclusive) [ g | pg | r | x ]
+     * @param bool       $img   True to return a complete IMG tag False for just the URL
+     * @param array      $attr  Optional, additional key/value attributes to include in the IMG tag
      *
      * @return String containing either just a URL or a complete image tag
      * @source https://gravatar.com/site/implement/images/php/
@@ -198,5 +198,27 @@ if (!function_exists('generate_git_branch')) {
     {
         /* Todo: Dont know what was i thinking ... will see */
         return '';
+    }
+}
+
+if (!function_exists('get_morphs_maps')) {
+    /**
+     * @param Model|string|null $class
+     *
+     * @return false|int|string|string[]
+     */
+    function get_morphs_maps($class = null)
+    {
+        $maps = [
+            'app' => 'app',
+            // 'user' => User::class,
+        ];
+
+        if (isset($class)) {
+            $class = $class instanceof Model && PHP_VERSION[0] <= 7 ? get_class($class) : $class::class;
+            return array_search($class, $maps);
+        }
+
+        return $maps;
     }
 }

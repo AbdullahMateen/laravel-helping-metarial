@@ -30,8 +30,8 @@ if (!function_exists('policy_authorization')) {
 
 if (!function_exists('gate_allows')) {
     /**
-     * @param string                                                $ability
-     * @param mixed                                                 $parameters
+     * @param string                     $ability
+     * @param mixed                      $parameters
      * @param Authenticatable|Model|null $user
      *
      * @return bool
@@ -47,8 +47,8 @@ if (!function_exists('gate_allows')) {
 
 if (!function_exists('gate_authorize')) {
     /**
-     * @param string                                                $ability
-     * @param mixed                                                 $parameters
+     * @param string                     $ability
+     * @param mixed                      $parameters
      * @param Authenticatable|Model|null $user
      *
      * @return Response
@@ -65,10 +65,10 @@ if (!function_exists('gate_authorize')) {
 
 if (!function_exists('gate_allows_redirect')) {
     /**
-     * @param string                                                $ability
-     * @param mixed                                                 $parameters
+     * @param string                     $ability
+     * @param mixed                      $parameters
      * @param Authenticatable|Model|null $user
-     * @param string                                                $route
+     * @param string                     $route
      *
      * @return RedirectResponse|bool
      */

@@ -1,21 +1,5 @@
 <?php
 
-if (!function_exists('get_morphs_maps')) {
-    function get_morphs_maps($class = null)
-    {
-        $maps = [
-            'app'  => 'app',
-            'user' => User::class,
-        ];
-
-        if (isset($class)) {
-            return array_search($class, $maps);
-        }
-
-        return $maps;
-    }
-}
-
 if (!function_exists('get_level_from_key')) {
     function get_level_from_key($key)
     {

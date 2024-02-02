@@ -1,23 +1,37 @@
 <?php
 
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 if (!function_exists('now_now')) {
-    function now_now(string $timezone = null): Carbon
+    /**
+     * @param string|null $timezone
+     *
+     * @return Carbon
+     */
+    function now_now(?string $timezone = null): Carbon
     {
-        return isset($timezone) ? now($timezone) : now(app_timezone());
+        return now($timezone ?? app_timezone());
     }
 }
 
 if (!function_exists('get_date_periods_between')) {
-    function get_date_periods_between($startDate, $endDate = null, $format = 'd M')
+    /**
+     * @param $startDate
+     * @param $endDate
+     * @param $format
+     *
+     * @return CarbonPeriod
+     */
+    function get_date_periods_between($startDate, $endDate = null, $format = 'd M'): CarbonPeriod
     {
         $endDate = $endDate ?? now();
 
-        $periods     = CarbonPeriod::create($startDate, $endDate);
-        $datePeriods = [];
-        foreach ($periods as $date) $datePeriods[] = $date->format($format);
-        return $datePeriods;
+        $periods = CarbonPeriod::create($startDate, $endDate);
+        foreach ($periods as $index => $date) {
+            $periods[$index] = $date->format($format);
+        }
+        return $periods;
     }
 }
 
