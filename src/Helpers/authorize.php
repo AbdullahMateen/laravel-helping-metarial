@@ -68,11 +68,11 @@ if (!function_exists('gate_allows_redirect')) {
      * @param string                     $ability
      * @param mixed                      $parameters
      * @param Authenticatable|Model|null $user
-     * @param string                     $route
+     * @param mixed                     $route
      *
      * @return RedirectResponse|bool
      */
-    function gate_allows_redirect(string $ability, $parameters = [], ?Model $user = null, string $route = 'dashboard'): RedirectResponse
+    function gate_allows_redirect(string $ability, $parameters = [], ?Model $user = null, $route = 'dashboard'): RedirectResponse
     {
         $allows = gate_allows($ability, $parameters, $user);
         if ($allows) {

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Random\RandomException;
 
 if (!function_exists('generate_username')) {
     /**
@@ -35,7 +36,7 @@ if (!function_exists('generate_password')) {
      * @param string $chars
      *
      * @return string
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     function generate_password(int $length = 12, string $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`-=~!@#$%^&*()_+,./<>?;:[]{}\|'): string
     {
@@ -71,7 +72,7 @@ if (!function_exists('generate_unique_id')) {
      * @param int $length
      *
      * @return string
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     function generate_unique_id(int $length = 10): string
     {
@@ -88,7 +89,7 @@ if (!function_exists('generate_unique_id_model')) {
      * @param int    $recursive
      *
      * @return string
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     function generate_unique_id_model(Model $modal, string $column, string $uniqueIdPrefix = '', int $length = 10, int $recursive = 5): string
     {
@@ -168,7 +169,7 @@ if (!function_exists('generate_gravatar')) {
 if (!function_exists('random_color_hex_part')) {
     /**
      * @return string
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     function random_color_hex_part(): string
     {
@@ -179,7 +180,7 @@ if (!function_exists('random_color_hex_part')) {
 if (!function_exists('generate_random_color_hex')) {
     /**
      * @return string
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     function generate_random_color_hex(): string
     {

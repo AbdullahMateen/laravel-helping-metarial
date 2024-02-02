@@ -1,26 +1,56 @@
 <?php
 
-if (!function_exists('route_url_to_name')) {
-    function route_url_to_name(\Illuminate\Http\Request|string $url, $method = 'get')
+use App\Http\Controllers\Auth\LoginController;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
+
+if (!function_exists('get_route_name_from_url')) {
+    /**
+     * @param Request|string $url
+     * @param string         $method
+     *
+     * @return string
+     */
+    function get_route_name_from_url($url, string $method = 'get'): string
     {
         try {
-            if ($url instanceof \Illuminate\Http\Request) {
+            if ($url instanceof Request) {
                 $method = $url->getMethod();
-                $url    = \Illuminate\Support\Facades\URL::current();
+                $url    = URL::current();
             }
             $request = app('router')->getRoutes()->match(app('request')->create($url, $method));
             return $request->getName();
         } catch (Exception $exception) {
-            return null;
+            return '';
         }
     }
 }
 
+if (!function_exists('route_url_to_name')) {
+    /**
+     * @param Request|string $url
+     * @param string         $method
+     *
+     * @return string
+     */
+    function route_url_to_name(string $url, string $method = 'get'): string
+    {
+        return get_route_name_from_url($url, $method);
+    }
+}
+
 if (!function_exists('is_route_name_exists')) {
-    function is_route_name_exists($routeName)
+    /**
+     * @param string $routeName
+     *
+     * @return false
+     */
+    function is_route_name_exists(string $routeName): bool
     {
         try {
-            return \Illuminate\Support\Facades\Route::has($routeName);
+            return Route::has($routeName);
         } catch (Exception $exception) {
             return false;
         }
@@ -28,58 +58,68 @@ if (!function_exists('is_route_name_exists')) {
 }
 
 if (!function_exists('get_current_route_name')) {
-    function get_current_route_name()
+    /**
+     * @return string|null
+     */
+    function get_current_route_name(): ?string
     {
-        return \Illuminate\Support\Facades\Route::currentRouteName();
+        return Route::currentRouteName();
     }
 }
 
 if (!function_exists('is_current_route')) {
-    function is_current_route($routeName)
+    /**
+     * @param string $routeName
+     *
+     * @return bool
+     */
+    function is_current_route(string $routeName): bool
     {
-        return get_current_route_name() == $routeName;
+        return get_current_route_name() === $routeName;
     }
 }
 
-if (!function_exists('is_current_route_in')) {
-    function is_current_route_in($routeNames)
-    {
-        $routeNames = is_array($routeNames) ? $routeNames : explode(',', $routeNames);
-        return in_array(get_current_route_name(), $routeNames);
-    }
-}
-
-if (!function_exists('route_url_is')) {
-    function route_url_is($wildCardURL)
-    {
-        return Request::is($wildCardURL);
-    }
-}
-
-if (!function_exists('route_is')) {
-    function route_is($name)
+if (!function_exists('is_route')) {
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    function is_route(string $name): bool
     {
         return is_current_route($name);
     }
 }
 
-if (!function_exists('get_route_name_from_url')) {
-    function get_route_name_from_url(\Illuminate\Http\Request|string $url, $method = 'get')
+if (!function_exists('is_current_route_in')) {
+    /**
+     * @param array|string $routeNames
+     *
+     * @return bool
+     */
+    function is_current_route_in($routeNames): bool
     {
-        try {
-            if ($url instanceof \Illuminate\Http\Request) {
-                $method = $url->getMethod();
-                $url    = \Illuminate\Support\Facades\URL::current();
-            }
-            $request = app('router')->getRoutes()->match(app('request')->create($url, $method));
-            return $request->getName();
-        } catch (Exception $exception) {
-            return null;
-        }
+        $routeNames = is_array($routeNames) ? $routeNames : explode(',', $routeNames);
+        return in_array(get_current_route_name(), $routeNames, true);
+    }
+}
+
+if (!function_exists('is_route_url')) {
+    /**
+     * @param string $wildCardURL
+     *
+     * @return bool
+     */
+    function is_route_url(string $wildCardURL): bool
+    {
+        return Request::is($wildCardURL);
     }
 }
 
 if (!function_exists('clear_intended_url')) {
+    /**
+     * @return void
+     */
     function clear_intended_url()
     {
         session()->forget('url.intended');
@@ -87,24 +127,41 @@ if (!function_exists('clear_intended_url')) {
 }
 
 if (!function_exists('logout_auth_user')) {
-    function logout_auth_user($request = null)
+    /**
+     * @param Request|null $request
+     * @param mixed        $redirectTo
+     *
+     * @return RedirectResponse
+     */
+    function logout_auth_user(?Request $request = null, $redirectTo = 'index'): RedirectResponse
     {
+        $redirect = redirect(filter_var($redirectTo, FILTER_VALIDATE_URL) ? $redirectTo : route($redirectTo));
         try {
-            if (!auth_check()) return redirect()->route('index');
-            $redirect = (new \App\Http\Controllers\Auth\LoginController())->logout($request ?? request());
+            if (!auth_check()) {
+                return $redirect;
+            }
+            $redirect = (new LoginController())->logout($request ?? request());
             clear_intended_url();
             return $redirect;
         } catch (Exception $exception) {
-            return redirect()->route('index');
+            return $redirect;
         }
     }
 }
 
 if (!function_exists('goto_route_encrypt')) {
-    function goto_route_encrypt($routeName, $parameters = [])
+    /**
+     * @param string $routeName
+     * @param array  $parameters
+     *
+     * @return string|null
+     */
+    function goto_route_encrypt(string $routeName, array $parameters = []): ?string
     {
         try {
-            if (!is_route_name_exists($routeName)) return null;
+            if (!is_route_name_exists($routeName)) {
+                return null;
+            }
             return encrypt($routeName . '|:|' . json_encode($parameters));
         } catch (Exception $exception) {
             return null;
@@ -113,11 +170,16 @@ if (!function_exists('goto_route_encrypt')) {
 }
 
 if (!function_exists('goto_route_decrypt')) {
-    function goto_route_decrypt($hash)
+    /**
+     * @param string $hash
+     *
+     * @return string|null
+     */
+    function goto_route_decrypt(string $hash): ?string
     {
         try {
             $route = explode('|:|', decrypt($hash));
-            return [$routeName = $route[0], $routeParameters = json_decode($route[1], true)];
+            return route($route[0], json_decode($route[1], true)); //  [$routeName = $route[0], $routeParameters = json_decode($route[1], true)];
         } catch (Exception $exception) {
             return null;
         }

@@ -1,17 +1,18 @@
 <?php
 
+use Illuminate\Support\Facades\File;
+
 if (!function_exists('get_enums')) {
     /**
      * @param string $key value,name
      *
      * @return array
      */
-    function get_enums(string $key = 'value'): array
+    function get_enums(string $key = 'value', $prefix = 'App\Enums'): array
     {
         $enums  = [];
-        $prefix = 'App\Enums';
 
-        $files = \Illuminate\Support\Facades\File::allFiles(app_path('Enums'));
+        $files = File::allFiles(app_path('Enums'));
         foreach ($files as $fi => $file) {
             $value        = null;
             $filename     = $file->getFilenameWithoutExtension();
