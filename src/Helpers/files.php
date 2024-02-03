@@ -56,7 +56,6 @@ if (!function_exists('filesystems_setup')) {
      *
      * @return array{disks: array, links: array}
      */
-    #[ArrayShape(['disks' => "array", 'links' => "array"])]
     function filesystems_setup(bool $shared = false, ?string $sharedPath = null): array
     {
         $disks  = [];

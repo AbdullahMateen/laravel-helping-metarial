@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
