@@ -5,9 +5,11 @@ use Illuminate\Http\RedirectResponse;
 
 /*
 |--------------------------------------------------------------------------
-| Impersonate Manager
+| Packages Related Helper Functions
 |--------------------------------------------------------------------------
 */
+
+/* ==================== Impersonate Manager ==================== */
 
 if (!function_exists('impersonate_manager')) {
     /**

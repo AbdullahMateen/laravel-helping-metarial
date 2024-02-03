@@ -1,0 +1,601 @@
+<?php
+
+use App\Enums\User\RoleEnum;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+use Random\RandomException;
+
+/*
+|--------------------------------------------------------------------------
+| User/Auth/Authorization Related Helper Functions
+|--------------------------------------------------------------------------
+*/
+
+/* ==================== Auth/Role ==================== */
+
+if (!function_exists('get_level_from_key')) {
+    /**
+     * @param string $key
+     *
+     * @return null
+     */
+    function get_level_from_key(string $key)
+    {
+        try {
+            return RoleEnum::fromName($key)->value;
+            // return User::LEVELS[$key];
+        } catch (Exception $exception) {
+            return null;
+        }
+    }
+}
+
+if (!function_exists('get_role_from_key')) {
+    /**
+     * @param string $key
+     *
+     * @return null
+     */
+    function get_role_from_key(string $key)
+    {
+        try {
+            return RoleEnum::fromName($key)->role();
+            // return User::ROLES[User::LEVELS[$key]];
+        } catch (Exception $exception) {
+            return null;
+        }
+    }
+}
+
+if (!function_exists('get_key_from_level')) {
+    /**
+     * @param string|int $level
+     *
+     * @return null
+     */
+    function get_key_from_level($level)
+    {
+        try {
+            return RoleEnum::tryFrom($level)->name;
+            // $keys = array_keys(User::LEVELS, $level);
+            // return isset($keys) && !empty($keys) ? $keys[0] : null;
+        } catch (Exception $exception) {
+            return null;
+        }
+    }
+}
+
+if (!function_exists('get_role_from_level')) {
+    /**
+     * @param string|int $level
+     *
+     * @return null
+     */
+    function get_role_from_level($level)
+    {
+        try {
+            return RoleEnum::tryFrom($level)->role();
+            // return User::ROLES[$level];
+        } catch (Exception $exception) {
+            return null;
+        }
+    }
+}
+
+if (!function_exists('get_key_from_role')) {
+    /**
+     * @param string $role
+     *
+     * @return null
+     */
+    function get_key_from_role(string $role)
+    {
+        try {
+            return RoleEnum::fromRole($role)->name;
+            // $levels = array_keys(User::ROLES, $role);
+            // $level  = isset($levels) && !empty($levels) ? $levels[0] : null;
+            // if ($level == null) return null;
+            // $keys = array_keys(User::LEVELS, $level);
+            // return isset($keys) && !empty($keys) ? $keys[0] : null;
+        } catch (Exception $exception) {
+            return null;
+        }
+    }
+}
+
+if (!function_exists('get_level_from_role')) {
+    /**
+     * @param string $role
+     *
+     * @return null
+     */
+    function get_level_from_role(string $role)
+    {
+        try {
+            return RoleEnum::fromRole($role)->value;
+            // return array_search($role, User::ROLES);
+        } catch (Exception $exception) {
+            return null;
+        }
+    }
+}
+
+if (!function_exists('is_level')) {
+    /**
+     * @param             $level
+     * @param             $user
+     * @param string|null $guard
+     *
+     * @return false
+     */
+    function is_level($level, $user = null, ?string $guard = null): bool
+    {
+        if (!isset($level) || empty($level)) return false;
+
+        try {
+            if (!isset($user)) {
+                $user = auth_user($guard);
+            } else if (is_numeric($user)) {
+                $user = User::find($user);
+            }
+            return $user->isLevel($level);
+        } catch (Exception $exception) {
+            return false;
+        }
+    }
+}
+
+if (!function_exists('auth_check')) {
+    /**
+     * @param string|null $guard
+     *
+     * @return bool
+     */
+    function auth_check(?string $guard = null): bool
+    {
+        try {
+            return auth($guard)->check();
+        } catch (Exception $exception) {
+            return false;
+        }
+    }
+}
+
+if (!function_exists('auth_user')) {
+    /**
+     * @param string|null $guard
+     *
+     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     */
+    function auth_user(?string $guard = null): ?\Illuminate\Contracts\Auth\Authenticatable
+    {
+        try {
+            return auth($guard)->user();
+        } catch (Exception $exception) {
+            return null;
+        }
+    }
+}
+
+if (!function_exists('auth_id')) {
+    /**
+     * @param string|null $guard
+     *
+     * @return int|string|null
+     */
+    function auth_id(?string $guard = null)
+    {
+        try {
+            return auth($guard)->id();
+        } catch (Exception $exception) {
+            return null;
+        }
+    }
+}
+
+if (!function_exists('is_me')) {
+    /**
+     * @param $user
+     * @param string|null $guard
+     *
+     * @return bool
+     */
+    function is_me($user, ?string $guard = null): bool
+    {
+        try {
+            if (!auth_check($guard)) return false;
+            if (is_numeric($user)) {
+                $user = User::find($user);
+            }
+            return auth_id($guard) == $user->id;
+        } catch (Exception $exception) {
+            return false;
+        }
+    }
+}
+
+if (!function_exists('get_user')) {
+    /**
+     * @param $user
+     * @param string|null $guard
+     *
+     * @return \Illuminate\Contracts\Auth\Authenticatable|User|null
+     */
+    function get_user($user = null, ?string $guard = null)
+    {
+        try {
+            if (!isset($user)) {
+                $user = auth_user($guard);
+            } elseif (is_numeric($user)) {
+                $user = User::find($user);
+            }
+
+            return $user;
+        } catch (Exception $exception) {
+            return null;
+        }
+    }
+}
+
+if (!function_exists('device_token')) {
+    /**
+     * @param $user
+     * @param string|null $guard
+     *
+     * @return string
+     */
+    function device_token($user, ?string $guard = null): string
+    {
+        try {
+            $user = get_user($user, $guard);
+            return $user->device_token ?? '';
+        } catch (Exception $exception) {
+            return '';
+        }
+    }
+}
+
+if (!function_exists('is_super_admin')) {
+    /**
+     * @param $user
+     * @param string|null $guard
+     *
+     * @return bool
+     */
+    function is_super_admin($user = null, ?string $guard = null): bool
+    {
+        try {
+            $user = get_user($user, $guard);
+            return isset($user) ? is_level(RoleEnum::SuperAdmin->value, $user) : false;
+        } catch (Exception $exception) {
+            return false;
+        }
+    }
+}
+
+if (!function_exists('is_account_blocked')) {
+    /**
+     * @param             $user
+     * @param string|null $guard
+     *
+     * @return bool
+     */
+    function is_account_blocked($user = null, ?string $guard = null): bool
+    {
+        try {
+            $user = get_user($user, $guard);
+            return isset($user) ? $user->status == User::KEY_STATUS_BLOCKED : true;
+        } catch (Exception $exception) {
+            return true;
+        }
+    }
+}
+
+
+
+
+/* ==================== Authorization/Gate ==================== */
+
+if (!function_exists('policy_authorization')) {
+    /**
+     * @param Model      $user
+     * @param string     $ability
+     * @param Model|null $model
+     *
+     * @return bool
+     */
+    function policy_authorization(Model $user, string $ability, ?Model $model = null): bool
+    {
+        if ($user->role->isReserved()) {
+            return true;
+        }
+        if (in_array($ability, $user->role->permission->permissions ?? [])) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+if (!function_exists('gate_allows')) {
+    /**
+     * @param string                     $ability
+     * @param mixed                      $parameters
+     * @param Authenticatable|Model|null $user
+     *
+     * @return bool
+     */
+    function gate_allows(string $ability, $parameters = [], ?Model $user = null): bool
+    {
+        $user = get_user($user);
+        return isset($user)
+            ? Gate::forUser($user)->allows($ability, $parameters)
+            : Gate::allows($ability, $parameters);
+    }
+}
+
+if (!function_exists('gate_authorize')) {
+    /**
+     * @param string                     $ability
+     * @param mixed                      $parameters
+     * @param Authenticatable|Model|null $user
+     *
+     * @return Response
+     * @throws AuthorizationException
+     */
+    function gate_authorize(string $ability, $parameters = [], ?Model $user = null): Response
+    {
+        $user = get_user($user);
+        return isset($user)
+            ? Gate::forUser($user)->authorize($ability, $parameters)
+            : Gate::authorize($ability, $parameters);
+    }
+}
+
+if (!function_exists('gate_allows_redirect')) {
+    /**
+     * @param string                     $ability
+     * @param mixed                      $parameters
+     * @param Authenticatable|Model|null $user
+     * @param mixed                     $route
+     *
+     * @return RedirectResponse|bool
+     */
+    function gate_allows_redirect(string $ability, $parameters = [], ?Model $user = null, $route = 'dashboard'): RedirectResponse
+    {
+        $allows = gate_allows($ability, $parameters, $user);
+        if ($allows) {
+            return false;
+        }
+
+        return redirect(
+            filter_var($route, FILTER_VALIDATE_URL) ? $route : route($route)
+        )->with('danger', __('Unauthorized request'));
+    }
+}
+
+
+
+
+/* ==================== Generate ==================== */
+
+if (!function_exists('generate_username')) {
+    /**
+     * @param string $name
+     *
+     * @return string
+     */
+    function generate_username(string $name = 'Guest'): string
+    {
+        return sprintf('%s.%s', Str::slug($name), uniqid('', true));
+    }
+}
+
+if (!function_exists('generate_email')) {
+    /**
+     * @param string      $name
+     * @param string|null $domain
+     *
+     * @return string
+     */
+    function generate_email(string $name, ?string $domain = null): string
+    {
+        $domain = $domain ?? app_domain();
+        return sprintf('%s@%s', generate_username($name), $domain);
+    }
+}
+
+if (!function_exists('generate_password')) {
+    /**
+     * @param int    $length
+     * @param string $chars
+     *
+     * @return string
+     * @throws RandomException
+     */
+    function generate_password(int $length = 12, string $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`-=~!@#$%^&*()_+,./<>?;:[]{}\|'): string
+    {
+        $password  = '';
+        $maxLength = strlen($chars) - 1;
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $chars[random_int(0, $maxLength)];
+        }
+
+        return $password;
+    }
+}
+
+if (!function_exists('generate_number')) {
+    /**
+     * @param int $length
+     *
+     * @return string
+     */
+    function generate_number(int $length = 10): string
+    {
+        $numbers = '0123456789';
+        if ($length > strlen($numbers)) {
+            $numbers = str_repeat($numbers, ($length / strlen($numbers) + 1));
+        }
+        return substr(str_shuffle($numbers), 0, $length);
+    }
+}
+
+if (!function_exists('generate_unique_id')) {
+    /**
+     * @param int $length
+     *
+     * @return string
+     * @throws RandomException
+     */
+    function generate_unique_id(int $length = 10): string
+    {
+        return substr(bin2hex(random_bytes($length)), 0, $length);
+    }
+}
+
+if (!function_exists('generate_unique_id_model')) {
+    /**
+     * @param Model  $modal
+     * @param string $column
+     * @param string $uniqueIdPrefix
+     * @param int    $length
+     * @param int    $recursive
+     *
+     * @return string
+     * @throws RandomException
+     */
+    function generate_unique_id_model(Model $modal, string $column, string $uniqueIdPrefix = '', int $length = 10, int $recursive = 5): string
+    {
+        $uniqueId = generate_unique_id($length);
+        if ($recursive > 0) {
+            if ($modal::where($column, '=', "$uniqueIdPrefix$uniqueId")->exists()) {
+                $uniqueId = generate_unique_id_model($modal, $column, $uniqueIdPrefix, $length, --$recursive);
+            }
+        } else {
+            $count    = $modal::where($column, 'LIKE', "%$uniqueIdPrefix$uniqueId%")->count();
+            $uniqueId .= ++$count;
+        }
+        return $uniqueId;
+    }
+}
+
+if (!function_exists('generate_avatar_name')) {
+    /**
+     * @param string $string
+     * @param string $delimiter
+     * @param bool   $uppercase
+     * @param int    $limit
+     *
+     * @return string
+     */
+    function generate_avatar_name(string $string, string $delimiter = ' ', bool $uppercase = true, int $limit = 2): string
+    {
+        return words_fc($string, $delimiter, $uppercase, $limit);
+    }
+}
+
+if (!function_exists('generate_avatar')) {
+    /**
+     * @param string|null $name
+     * @param string      $fontColor
+     * @param string      $backgroundColor
+     *
+     * @return string
+     */
+    function generate_avatar(?string $name = null, string $fontColor = 'ffffff', string $backgroundColor = '293042'): string
+    {
+        $name = $name ?? get_user()->name ?? 'Anonymous';
+        return "https://ui-avatars.com/api/?name=$name&background=$backgroundColor&color=$fontColor";
+    }
+}
+
+if (!function_exists('generate_gravatar')) {
+    /**
+     * Get either a Gravatar URL or complete image tag for a specified email address.
+     *
+     * @param string     $email The email address
+     * @param string|int $s     Size in pixels, defaults to 80px [ 1 - 2048 ]
+     * @param string     $d     Default imageset to use [ 404 | mp | identicon | monsterid | wavatar | retro | robohash | blank ]
+     * @param string     $r     Maximum rating (inclusive) [ g | pg | r | x ]
+     * @param bool       $img   True to return a complete IMG tag False for just the URL
+     * @param array      $attr  Optional, additional key/value attributes to include in the IMG tag
+     *
+     * @return String containing either just a URL or a complete image tag
+     * @source https://gravatar.com/site/implement/images/php/
+     */
+    function generate_gravatar(string $email, int $s = 80, string $d = 'mp', string $r = 'g', bool $img = false, array $attr = []): string
+    {
+        $url = 'https://www.gravatar.com/avatar/';
+        $url .= md5(strtolower(trim($email)));
+        $url .= "?s=$s&d=$d&r=$r";
+        if ($img) {
+            $url = '<img src="' . $url . '"';
+            foreach ($attr as $key => $val) {
+                $url .= ' ' . $key . '="' . $val . '"';
+            }
+            $url .= ' />';
+        }
+        return $url;
+    }
+}
+
+if (!function_exists('random_color_hex_part')) {
+    /**
+     * @return string
+     * @throws RandomException
+     */
+    function random_color_hex_part(): string
+    {
+        return str_pad(dechex(random_int(0, 255)), 2, '0', STR_PAD_LEFT);
+    }
+}
+
+if (!function_exists('generate_random_color_hex')) {
+    /**
+     * @return string
+     * @throws RandomException
+     */
+    function generate_random_color_hex(): string
+    {
+        return '#' . random_color_hex_part() . random_color_hex_part() . random_color_hex_part();
+    }
+}
+
+if (!function_exists('generate_git_branch')) {
+    /**
+     * @param string $type Type Could be [ Fix | Imp | Debug | Func | HotFix | etc. ]
+     * @param string $name
+     *
+     * @return string
+     */
+    function generate_git_branch(string $type, string $name): string
+    {
+        /* Todo: Dont know what was i thinking ... will see */
+        return '';
+    }
+}
+
+if (!function_exists('is_email_address')) {
+    /**
+     * @param string $email
+     *
+     * @return bool
+     */
+    function is_email_address(string $email): bool
+    {
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $find1 = strpos($email, '@');
+            $find2 = strpos($email, '.');
+            return ($find1 !== false && $find2 !== false);
+        }
+        return false;
+    }
+}
