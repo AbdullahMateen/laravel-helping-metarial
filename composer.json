@@ -24,9 +24,11 @@
     "autoload": {
         "psr-4": {
             "AbdullahMateen\\LaravelHelpingMaterial\\": "src/"
-        },
+        }
+    },
+    "autoload-dev": {
         "files": [
-          "src/Helpers/helpers.php"
+            "src/Helpers/helpers.php"
         ]
     },
     "extra": {
