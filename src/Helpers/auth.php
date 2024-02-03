@@ -1,11 +1,18 @@
 <?php
 
+use App\Enums\User\RoleEnum;
+
 if (!function_exists('get_level_from_key')) {
-    function get_level_from_key($key)
+    /**
+     * @param string $key
+     *
+     * @return null
+     */
+    function get_level_from_key(string $key)
     {
         try {
-            return \App\Enums\User\RoleEnum::fromName($key)->value;
-            //            return User::LEVELS[$key];
+            return RoleEnum::fromName($key)->value;
+            // return User::LEVELS[$key];
         } catch (Exception $exception) {
             return null;
         }
@@ -13,10 +20,15 @@ if (!function_exists('get_level_from_key')) {
 }
 
 if (!function_exists('get_role_from_key')) {
-    function get_role_from_key($key)
+    /**
+     * @param string $key
+     *
+     * @return null
+     */
+    function get_role_from_key(string $key)
     {
         try {
-            return \App\Enums\User\RoleEnum::fromName($key)->role();
+            return RoleEnum::fromName($key)->role();
             // return User::ROLES[User::LEVELS[$key]];
         } catch (Exception $exception) {
             return null;
@@ -25,12 +37,17 @@ if (!function_exists('get_role_from_key')) {
 }
 
 if (!function_exists('get_key_from_level')) {
+    /**
+     * @param string|int $level
+     *
+     * @return null
+     */
     function get_key_from_level($level)
     {
         try {
-            return \App\Enums\User\RoleEnum::tryFrom($level)->name;
-            //            $keys = array_keys(User::LEVELS, $level);
-            //            return isset($keys) && !empty($keys) ? $keys[0] : null;
+            return RoleEnum::tryFrom($level)->name;
+            // $keys = array_keys(User::LEVELS, $level);
+            // return isset($keys) && !empty($keys) ? $keys[0] : null;
         } catch (Exception $exception) {
             return null;
         }
@@ -38,11 +55,16 @@ if (!function_exists('get_key_from_level')) {
 }
 
 if (!function_exists('get_role_from_level')) {
+    /**
+     * @param string|int $level
+     *
+     * @return null
+     */
     function get_role_from_level($level)
     {
         try {
-            return \App\Enums\User\RoleEnum::tryFrom($level)->role();
-            //            return User::ROLES[$level];
+            return RoleEnum::tryFrom($level)->role();
+            // return User::ROLES[$level];
         } catch (Exception $exception) {
             return null;
         }
@@ -50,15 +72,20 @@ if (!function_exists('get_role_from_level')) {
 }
 
 if (!function_exists('get_key_from_role')) {
-    function get_key_from_role($role)
+    /**
+     * @param string $role
+     *
+     * @return null
+     */
+    function get_key_from_role(string $role)
     {
         try {
-            return \App\Enums\User\RoleEnum::fromRole($role)->name;
-            //            $levels = array_keys(User::ROLES, $role);
-            //            $level  = isset($levels) && !empty($levels) ? $levels[0] : null;
-            //            if ($level == null) return null;
-            //            $keys = array_keys(User::LEVELS, $level);
-            //            return isset($keys) && !empty($keys) ? $keys[0] : null;
+            return RoleEnum::fromRole($role)->name;
+            // $levels = array_keys(User::ROLES, $role);
+            // $level  = isset($levels) && !empty($levels) ? $levels[0] : null;
+            // if ($level == null) return null;
+            // $keys = array_keys(User::LEVELS, $level);
+            // return isset($keys) && !empty($keys) ? $keys[0] : null;
         } catch (Exception $exception) {
             return null;
         }
@@ -66,11 +93,16 @@ if (!function_exists('get_key_from_role')) {
 }
 
 if (!function_exists('get_level_from_role')) {
-    function get_level_from_role($role)
+    /**
+     * @param string $role
+     *
+     * @return null
+     */
+    function get_level_from_role(string $role)
     {
         try {
-            return \App\Enums\User\RoleEnum::fromRole($role)->value;
-            //            return array_search($role, User::ROLES);
+            return RoleEnum::fromRole($role)->value;
+            // return array_search($role, User::ROLES);
         } catch (Exception $exception) {
             return null;
         }
@@ -78,13 +110,20 @@ if (!function_exists('get_level_from_role')) {
 }
 
 if (!function_exists('is_level')) {
-    function is_level($level, $user = null)
+    /**
+     * @param             $level
+     * @param             $user
+     * @param string|null $guard
+     *
+     * @return false
+     */
+    function is_level($level, $user = null, ?string $guard = null): bool
     {
         if (!isset($level) || empty($level)) return false;
 
         try {
             if (!isset($user)) {
-                $user = auth_check() ? auth_user() : null;
+                $user = auth_user($guard);
             } else if (is_numeric($user)) {
                 $user = User::find($user);
             }
@@ -96,10 +135,15 @@ if (!function_exists('is_level')) {
 }
 
 if (!function_exists('auth_check')) {
-    function auth_check()
+    /**
+     * @param string|null $guard
+     *
+     * @return bool
+     */
+    function auth_check(?string $guard = null): bool
     {
         try {
-            return auth()->check();
+            return auth($guard)->check();
         } catch (Exception $exception) {
             return false;
         }
@@ -107,10 +151,15 @@ if (!function_exists('auth_check')) {
 }
 
 if (!function_exists('auth_user')) {
-    function auth_user()
+    /**
+     * @param string|null $guard
+     *
+     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     */
+    function auth_user(?string $guard = null): ?\Illuminate\Contracts\Auth\Authenticatable
     {
         try {
-            return auth()->user();
+            return auth($guard)->user();
         } catch (Exception $exception) {
             return null;
         }
@@ -118,10 +167,15 @@ if (!function_exists('auth_user')) {
 }
 
 if (!function_exists('auth_id')) {
-    function auth_id()
+    /**
+     * @param string|null $guard
+     *
+     * @return int|string|null
+     */
+    function auth_id(?string $guard = null)
     {
         try {
-            return auth()->id();
+            return auth($guard)->id();
         } catch (Exception $exception) {
             return null;
         }
@@ -129,14 +183,20 @@ if (!function_exists('auth_id')) {
 }
 
 if (!function_exists('is_me')) {
-    function is_me($user)
+    /**
+     * @param $user
+     * @param string|null $guard
+     *
+     * @return bool
+     */
+    function is_me($user, ?string $guard = null): bool
     {
         try {
-            if (!auth_check()) return false;
+            if (!auth_check($guard)) return false;
             if (is_numeric($user)) {
                 $user = User::find($user);
             }
-            return auth_id() == $user->id ? true : false;
+            return auth_id($guard) == $user->id;
         } catch (Exception $exception) {
             return false;
         }
@@ -144,11 +204,17 @@ if (!function_exists('is_me')) {
 }
 
 if (!function_exists('get_user')) {
-    function get_user($user = null)
+    /**
+     * @param $user
+     * @param string|null $guard
+     *
+     * @return \Illuminate\Contracts\Auth\Authenticatable|User|null
+     */
+    function get_user($user = null, ?string $guard = null)
     {
         try {
             if (!isset($user)) {
-                $user = auth_check() ? auth_user() : null;
+                $user = auth_user($guard);
             } elseif (is_numeric($user)) {
                 $user = User::find($user);
             }
@@ -161,10 +227,16 @@ if (!function_exists('get_user')) {
 }
 
 if (!function_exists('device_token')) {
-    function device_token($user)
+    /**
+     * @param $user
+     * @param string|null $guard
+     *
+     * @return string
+     */
+    function device_token($user, ?string $guard = null): string
     {
         try {
-            $user = get_user($user);
+            $user = get_user($user, $guard);
             return $user->device_token ?? '';
         } catch (Exception $exception) {
             return '';
@@ -173,11 +245,17 @@ if (!function_exists('device_token')) {
 }
 
 if (!function_exists('is_super_admin')) {
-    function is_super_admin($user = null): bool
+    /**
+     * @param $user
+     * @param string|null $guard
+     *
+     * @return bool
+     */
+    function is_super_admin($user = null, ?string $guard = null): bool
     {
         try {
-            $user = get_user($user);
-            return isset($user) ? is_level(\App\Enums\User\RoleEnum::SuperAdmin->value, $user) : false;
+            $user = get_user($user, $guard);
+            return isset($user) ? is_level(RoleEnum::SuperAdmin->value, $user) : false;
         } catch (Exception $exception) {
             return false;
         }
@@ -185,10 +263,16 @@ if (!function_exists('is_super_admin')) {
 }
 
 if (!function_exists('is_account_blocked')) {
-    function is_account_blocked($user = null)
+    /**
+     * @param             $user
+     * @param string|null $guard
+     *
+     * @return bool
+     */
+    function is_account_blocked($user = null, ?string $guard = null): bool
     {
         try {
-            $user = get_user($user);
+            $user = get_user($user, $guard);
             return isset($user) ? $user->status == User::KEY_STATUS_BLOCKED : true;
         } catch (Exception $exception) {
             return true;

@@ -1,14 +1,47 @@
 <?php
 
+
+use Carbon\Carbon;
+
 if (!function_exists('display_number')) {
-    function display_number($number, int $decimal = 2, string $decimalPoint = '.', string $thousandsSeparator = ''): string
+    /**
+     * @param string|int|float $number
+     * @param int              $decimal
+     * @param string           $decimalPoint
+     * @param string           $thousandsSeparator
+     *
+     * @return string
+     */
+    function display_number($number, int $decimal = 2, string $decimalPoint = '.', string $thousandsSeparator = ','): string
     {
         return number_format($number, $decimal, $decimalPoint, $thousandsSeparator);
     }
 }
 
+if (!function_exists('to_number')) {
+    /**
+     * @param string|int|float $number
+     * @param int              $decimal
+     * @param string           $decimalPoint
+     * @param string           $thousandsSeparator
+     *
+     * @return string
+     */
+    function to_number($number, int $decimal = 2, string $decimalPoint = '.', string $thousandsSeparator = ''): string
+    {
+        return display_number($number, $decimal, $decimalPoint, $thousandsSeparator);
+    }
+}
+
 if (!function_exists('human_readable_number')) {
-    #[Pure]
+    /**
+     * @param string|int|float $number
+     * @param int              $decimal
+     * @param string           $decimalPoint
+     * @param string           $thousandsSeparator
+     *
+     * @return string
+     */
     function human_readable_number($number, int $decimal = 2, string $decimalPoint = '.', string $thousandsSeparator = ','): string
     {
         return display_number($number, $decimal, $decimalPoint, $thousandsSeparator);
@@ -16,88 +49,116 @@ if (!function_exists('human_readable_number')) {
 }
 
 if (!function_exists('is_zero')) {
+    /**
+     * @param mixed $number
+     *
+     * @return bool
+     */
     function is_zero($number): bool
     {
-        return $number == 0;
+        return is_numeric($number) && (int) $number === 0;
     }
 }
 
 if (!function_exists('is_negative')) {
+    /**
+     * @param mixed $number
+     *
+     * @return bool
+     */
     function is_negative($number): bool
     {
-        return $number < 0;
+        return is_numeric($number) && $number < 0;
     }
 }
 
 if (!function_exists('is_negative_or_zero')) {
+    /**
+     * @param mixed $number
+     *
+     * @return bool
+     */
     function is_negative_or_zero($number): bool
     {
-        return $number <= 0;
+        return is_numeric($number) && $number <= 0;
     }
 }
 
 if (!function_exists('is_positive')) {
+    /**
+     * @param mixed $number
+     *
+     * @return bool
+     */
     function is_positive($number): bool
     {
-        return $number > 0;
+        return is_numeric($number) && $number > 0;
     }
 }
 
 if (!function_exists('is_positive_or_zero')) {
+    /**
+     * @param mixed $number
+     *
+     * @return bool
+     */
     function is_positive_or_zero($number): bool
     {
-        return $number >= 0;
+        return is_numeric($number) && $number >= 0;
     }
 }
 
 if (!function_exists('calculate_age')) {
     /**
-     * @param $dateOfBirth   'Y-m-d'
-     * @param $dateTill      'Y-m-d'
-     * @param $todayIncluded 'true, false'
+     * @param Carbon|string      $dateOfBirth
+     * @param Carbon|string|null $dateTill
+     * @param bool               $todayIncluded
      *
      * @return int|null
      */
     function calculate_age($dateOfBirth, $dateTill = null, bool $todayIncluded = true): ?int
     {
         try {
-            $dateOfBirth = Carbon::createFromFormat('Y-m-d', $dateOfBirth, app_timezone());
-            $dateTill    = isset($dateTill) ? Carbon::createFromFormat('Y-m-d', $dateTill, app_timezone()) : $dateTill;
-            return $todayIncluded ? Carbon::parse($dateOfBirth)->diffInYears($dateTill) : Carbon::parse($dateOfBirth)->diffInYears(Carbon::parse($dateTill)->subDay());
+            $dateTill    = Carbon::parse($dateTill, app_timezone());
+            $dateOfBirth = Carbon::parse($dateOfBirth, app_timezone());
+            return $todayIncluded
+                ? Carbon::parse($dateOfBirth)->diffInYears($dateTill)
+                : Carbon::parse($dateOfBirth)->diffInYears($dateTill->subDay());
         } catch (Exception $exception) {
             return null;
         }
     }
 }
 
-if (!function_exists('is_age_match_criteria')) {
+if (!function_exists('is_age_acceptable')) {
     /**
-     * @param $dateOfBirth 'Y-m-d'
-     * @param $dateTill    'Y-m-d'
-     * @param $operator    '==, ===, <>, !=, !==, <, <=, >, >=, <=>'
-     * @param $criteria    '16'
+     * @param Carbon|string      $dateOfBirth 'Y-m-d'
+     * @param Carbon|string|null $dateTill    'Y-m-d'
+     * @param string             $operator    "<", "lt", "<=", "le", ">", "gt", ">=", "ge", "==", "=", "eq", "!=", "<>", "ne"
+     * @param int                $criteria    '16'
      *
-     * @return bool|int|null
+     * @return bool|null
      */
-    function is_age_match_criteria($dateOfBirth, $dateTill = null, $operator = '<=', $criteria = 16): bool|int|null
+    function is_age_acceptable($dateOfBirth, $dateTill = null, string $operator = '<=', int $criteria = 16): ?bool
     {
         try {
             $age = calculate_age(
-                Carbon::createFromFormat('Y-m-d', $dateOfBirth, app_timezone())->format('Y-m-d'),
-                isset($dateTill) ? Carbon::createFromFormat('Y-m-d', $dateTill, app_timezone())->format('Y-m-d') : $dateTill
+                Carbon::parse($dateOfBirth, app_timezone())->format('Y-m-d'),
+                Carbon::parse($dateTill, app_timezone())->format('Y-m-d')
             );
-            return match ($operator) {
-                '=='  => $age == $criteria,
-                '===' => $age === $criteria,
-                '<>'  => $age <> $criteria,
-                '!='  => $age != $criteria,
-                '!==' => $age !== $criteria,
-                '<'   => $age < $criteria,
-                '<='  => $age <= $criteria,
-                '>'   => $age > $criteria,
-                '>='  => $age >= $criteria,
-                '<=>' => $age <=> $criteria,
-            };
+            return version_compare($age, $criteria, $operator);
+            //            return match ($operator) {
+            //                '=='  => $age == $criteria,
+            //                '===' => $age === $criteria,
+            //                '<>'  => $age <> $criteria,
+            //                '!='  => $age != $criteria,
+            //                '!==' => $age !== $criteria,
+            //                '<'   => $age < $criteria,
+            //                '<='  => $age <= $criteria,
+            //                '>'   => $age > $criteria,
+            //                '>='  => $age >= $criteria,
+            //                '<=>' => $age <=> $criteria,
+            //            };
         } catch (Exception $exception) {
             return null;
         }
@@ -105,7 +166,12 @@ if (!function_exists('is_age_match_criteria')) {
 }
 
 if (!function_exists('number_to_words')) {
-    function number_to_words($number, $isApprox = false)
+    /**
+     * @param int|float|string $number
+     *
+     * @return string
+     */
+    function number_to_words($number): string
     {
         try {
             $number = str_replace(',', '', $number);
@@ -114,23 +180,20 @@ if (!function_exists('number_to_words')) {
             $spell     = $formatter->format($number);
             $spell     = strtolower($spell);
 
-            if ($isApprox) {
-                $spells = explode(' ', $spell);
-                if ($spells[1] === 'hundred') {
-                    $spell = $spells[0] . ' ' . $spells[1] . ' ' . $spells[2];
-                } else {
-                    $spell = $spells[0] . ' ' . $spells[1];
-                }
-            }
-
             return $spell;
         } catch (Exception $exception) {
-            return 'zero';
+            return '';
         }
     }
 }
 
 if (!function_exists('get_percentage_of_value')) {
+    /**
+     * @param $current
+     * @param $total
+     *
+     * @return float|int
+     */
     function get_percentage_of_value($current, $total)
     {
         if ($total == 0) return 0;
@@ -139,6 +202,12 @@ if (!function_exists('get_percentage_of_value')) {
 }
 
 if (!function_exists('get_value_of_percentage')) {
+    /**
+     * @param $percentage
+     * @param $total
+     *
+     * @return float|int
+     */
     function get_value_of_percentage($percentage, $total)
     {
         if ($percentage == 0) return 0;
@@ -147,6 +216,12 @@ if (!function_exists('get_value_of_percentage')) {
 }
 
 if (!function_exists('get_total_from_amount_n_percentage')) {
+    /**
+     * @param $amount
+     * @param $percentage
+     *
+     * @return float|int
+     */
     function get_total_from_amount_n_percentage($amount, $percentage)
     {
         if ($amount == 0) return 0;
@@ -165,7 +240,7 @@ if (!function_exists('percentage_difference')) {
      *
      * @return float|int
      */
-    function percentage_difference(float $amount1, float $amount2, bool $difference = true): float|int
+    function percentage_difference(float $amount1, float $amount2, bool $difference = true)
     {
         if ($difference) {
             return (abs($amount1 - $amount2) / (($amount1 + $amount2) / 2)) * 100;
@@ -185,7 +260,7 @@ if (!function_exists('percentage_change')) {
      *
      * @return float|int
      */
-    function percentage_change(float $amount, float $percentage, bool $increment = true): float|int
+    function percentage_change(float $amount, float $percentage, bool $increment = true)
     {
         return $increment ? $amount * (1 + ($percentage / 100)) : $amount * (1 - ($percentage / 100));
     }

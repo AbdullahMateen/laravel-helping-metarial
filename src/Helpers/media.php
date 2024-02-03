@@ -1,12 +1,20 @@
 <?php
 
+use App\Models\Media;
+use App\Services\Media\MediaService;
+
 if (!function_exists('is_media_type_image')) {
-    function is_media_type_image(string $string)
+    /**
+     * @param string $string
+     *
+     * @return bool
+     */
+    function is_media_type_image(string $string): bool
     {
         try {
-            if ($string === \App\Models\Media::KEY_CATEGORY_IMAGE) return true;
+            if ($string === Media::KEY_CATEGORY_IMAGE) return true;
             if (strpos($string, ' image/') !== false) return true;
-            if (in_array(strtolower($string), \App\Services\Media\MediaService::$imageExtensions)) return true;
+            if (in_array(strtolower($string), MediaService::$imageExtensions)) return true;
 
             return false;
         } catch (Exception $exception) {
@@ -16,11 +24,16 @@ if (!function_exists('is_media_type_image')) {
 }
 
 if (!function_exists('is_media_type_video')) {
-    function is_media_type_video($string)
+    /**
+     * @param string $string
+     *
+     * @return bool
+     */
+    function is_media_type_video(string $string): bool
     {
         try {
-            if ($string === \App\Models\Media::KEY_CATEGORY_VIDEO) return true;
-            if (in_array(strtolower($string), \App\Services\Media\MediaService::$videoExtensions)) return true;
+            if ($string === Media::KEY_CATEGORY_VIDEO) return true;
+            if (in_array(strtolower($string), MediaService::$videoExtensions)) return true;
 
             return false;
         } catch (Exception $exception) {
@@ -30,11 +43,16 @@ if (!function_exists('is_media_type_video')) {
 }
 
 if (!function_exists('is_media_type_document')) {
-    function is_media_type_document($string)
+    /**
+     * @param string $string
+     *
+     * @return bool
+     */
+    function is_media_type_document(string $string): bool
     {
         try {
-            if ($string === \App\Models\Media::KEY_CATEGORY_DOCUMENT) return true;
-            if (in_array(strtolower($string), \App\Services\Media\MediaService::$documentExtensions)) return true;
+            if ($string === Media::KEY_CATEGORY_DOCUMENT) return true;
+            if (in_array(strtolower($string), MediaService::$documentExtensions)) return true;
 
             return false;
         } catch (Exception $exception) {
@@ -44,11 +62,16 @@ if (!function_exists('is_media_type_document')) {
 }
 
 if (!function_exists('is_media_type_archive')) {
-    function is_media_type_archive($string)
+    /**
+     * @param string $string
+     *
+     * @return bool
+     */
+    function is_media_type_archive(string $string): bool
     {
         try {
-            if ($string === \App\Models\Media::KEY_CATEGORY_ARCHIVE) return true;
-            if (in_array(strtolower($string), \App\Services\Media\MediaService::$archiveExtensions)) return true;
+            if ($string === Media::KEY_CATEGORY_ARCHIVE) return true;
+            if (in_array(strtolower($string), MediaService::$archiveExtensions)) return true;
 
             return false;
         } catch (Exception $exception) {
@@ -58,13 +81,18 @@ if (!function_exists('is_media_type_archive')) {
 }
 
 if (!function_exists('is_media_type_of')) {
-    function is_media_type_of($string)
+    /**
+     * @param string $string
+     *
+     * @return string|null
+     */
+    function is_media_type_of(string $string)
     {
         try {
-            if (is_media_type_image($string)) return \App\Models\Media::KEY_CATEGORY_IMAGE;
-            if (is_media_type_video($string)) return \App\Models\Media::KEY_CATEGORY_VIDEO;
-            if (is_media_type_document($string)) return \App\Models\Media::KEY_CATEGORY_DOCUMENT;
-            if (is_media_type_archive($string)) return \App\Models\Media::KEY_CATEGORY_ARCHIVE;
+            if (is_media_type_image($string)) return Media::KEY_CATEGORY_IMAGE;
+            if (is_media_type_video($string)) return Media::KEY_CATEGORY_VIDEO;
+            if (is_media_type_document($string)) return Media::KEY_CATEGORY_DOCUMENT;
+            if (is_media_type_archive($string)) return Media::KEY_CATEGORY_ARCHIVE;
 
             return null;
         } catch (Exception $exception) {

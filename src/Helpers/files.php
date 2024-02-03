@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Media;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 if (!function_exists('get_enums')) {
     /**
@@ -8,18 +10,22 @@ if (!function_exists('get_enums')) {
      *
      * @return array
      */
-    function get_enums(string $key = 'value', $prefix = 'App\Enums'): array
+    function get_enums(string $key = 'value', $baseEnumFolderPath = 'App\Enums'): array
     {
         $enums  = [];
 
-        $files = File::allFiles(app_path('Enums'));
+        $folders = explode('\\', $baseEnumFolderPath);
+        $app = array_shift($folders);
+        $folders = implode('\\', array_map('ucwords', $folders));
+
+        $files = File::allFiles(app_path($folders));
         foreach ($files as $fi => $file) {
             $value        = null;
             $filename     = $file->getFilenameWithoutExtension();
-            $relativePath = str($file->getRelativePath())->replace('/', '\\')->value();
+            $relativePath = Str::replaceArray('/', ['\\'], $file->getRelativePath()); //  str($file->getRelativePath())->replace('/', '\\')->value();
             $path         = empty($relativePath) ? 'General' : $relativePath;
 
-            $class            = str("$prefix\\$relativePath\\$filename")->replace('\\\\', '\\')->value();
+            $class            = Str::replaceArray('\\\\', ['\\'], "$baseEnumFolderPath\\$relativePath\\$filename"); //  str("$baseEnumFolderPath\\$relativePath\\$filename")->replace('\\\\', '\\')->value();
             $value[$filename] = $class::toFullArray('cases', $key);
             set_nested_array_value($enums[$fi], $path, $value, '\\');
         }
@@ -28,12 +34,19 @@ if (!function_exists('get_enums')) {
     }
 }
 
+/* Todo: This is a testing function, but you can use it as it is if you want. without changing params */
 if (!function_exists('filesystems_setup')) {
+    /**
+     * @param bool        $shared
+     * @param string|null $sharedPath
+     *
+     * @return array{disks: array, links: array}
+     */
     #[ArrayShape(['disks' => "array", 'links' => "array"])]
-    function filesystems_setup(bool $shared = false, string|null $sharedPath = null): array
+    function filesystems_setup(bool $shared = false, ?string $sharedPath = null): array
     {
         $disks  = [];
-        $shared = !isset($sharedPath) ? false : $shared;
+        $shared = isset($sharedPath) && $shared;
 
         if ($shared) {
             $links["$sharedPath/public"]        = storage_path('app/public');
@@ -42,7 +55,7 @@ if (!function_exists('filesystems_setup')) {
             $links = [public_path('media/public') => storage_path('app/public')];
         }
 
-        foreach (\App\Models\Media::DISKS as $key => $value) {
+        foreach (Media::DISKS as $key => $value) {
             $disks[$key] = [
                 'driver'     => 'local',
                 'root'       => storage_path("app/{$key}"),
