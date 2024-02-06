@@ -6,6 +6,7 @@ package-lock.json
 
 _ide_helper.php
 .phpstorm.meta.php
+.phpunit.result.cache
 
 .idea
 .vscode
