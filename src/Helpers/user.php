@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\User\RoleEnum;
+use AbdullahMateen\LaravelHelpingMaterial\Enums\User\RoleEnum;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Contracts\Auth\Authenticatable;

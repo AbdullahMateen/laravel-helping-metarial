@@ -1,0 +1,58 @@
+$start: 0.1;
+$end: 10;
+
+$margins: "";
+
+$i: $start;
+@while $i <= $end {
+
+  $value: #{$i};
+  $value: str-replace($value, '.', '');
+
+  .m-#{$value}rem {
+    margin: #{$i}rem !important;
+  }
+  .mt-#{$value}rem {
+    margin-top: #{$i}rem !important;
+  }
+  .mb-#{$value}rem {
+    margin-bottom: #{$i}rem !important;
+  }
+  .ml-#{$value}rem {
+    margin-left: #{$i}rem !important;
+  }
+  .mr-#{$value}rem {
+    margin-right: #{$i}rem !important;
+  }
+  .mx-#{$value}rem {
+    margin-left: #{$i}rem !important;
+    margin-right: #{$i}rem !important;
+  }
+  .my-#{$value}rem {
+    margin-top: #{$i}rem !important;
+    margin-bottom: #{$i}rem !important;
+  }
+
+  .mt-n-#{$value}rem {
+    margin-top: -#{$i}rem !important;
+  }
+  .mb-n-#{$value}rem {
+    margin-bottom: -#{$i}rem !important;
+  }
+  .ml-n-#{$value}rem {
+    margin-left: -#{$i}rem !important;
+  }
+  .mr-n-#{$value}rem {
+    margin-right: -#{$i}rem !important;
+  }
+  .mx-n-#{$value}rem {
+    margin-left: -#{$i}rem !important;
+    margin-right: -#{$i}rem !important;
+  }
+  .my-n-#{$value}rem {
+    margin-top: #{$i}rem !important;
+    margin-bottom: #{$i}rem !important;
+  }
+
+  $i: $i + 0.1;
+}

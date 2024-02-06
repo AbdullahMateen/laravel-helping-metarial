@@ -14,14 +14,14 @@ use Carbon\CarbonPeriod;
 
 if (!function_exists('display_number')) {
     /**
-     * @param string|int|float $number
+     * @param float|int|string $number
      * @param int              $decimal
      * @param string           $decimalPoint
      * @param string           $thousandsSeparator
      *
      * @return string
      */
-    function display_number($number, int $decimal = 2, string $decimalPoint = '.', string $thousandsSeparator = ','): string
+    function display_number(float|int|string $number, int $decimal = 2, string $decimalPoint = '.', string $thousandsSeparator = ','): string
     {
         return number_format($number, $decimal, $decimalPoint, $thousandsSeparator);
     }
@@ -29,14 +29,14 @@ if (!function_exists('display_number')) {
 
 if (!function_exists('to_number')) {
     /**
-     * @param string|int|float $number
+     * @param float|int|string $number
      * @param int              $decimal
      * @param string           $decimalPoint
      * @param string           $thousandsSeparator
      *
      * @return string
      */
-    function to_number($number, int $decimal = 2, string $decimalPoint = '.', string $thousandsSeparator = ''): string
+    function to_number(float|int|string $number, int $decimal = 2, string $decimalPoint = '.', string $thousandsSeparator = ''): string
     {
         return display_number($number, $decimal, $decimalPoint, $thousandsSeparator);
     }
@@ -44,14 +44,14 @@ if (!function_exists('to_number')) {
 
 if (!function_exists('human_readable_number')) {
     /**
-     * @param string|int|float $number
+     * @param float|int|string $number
      * @param int              $decimal
      * @param string           $decimalPoint
      * @param string           $thousandsSeparator
      *
      * @return string
      */
-    function human_readable_number($number, int $decimal = 2, string $decimalPoint = '.', string $thousandsSeparator = ','): string
+    function human_readable_number(float|int|string $number, int $decimal = 2, string $decimalPoint = '.', string $thousandsSeparator = ','): string
     {
         return display_number($number, $decimal, $decimalPoint, $thousandsSeparator);
     }
@@ -63,7 +63,7 @@ if (!function_exists('is_zero')) {
      *
      * @return bool
      */
-    function is_zero($number): bool
+    function is_zero(mixed $number): bool
     {
         return is_numeric($number) && (int) $number === 0;
     }
@@ -75,7 +75,7 @@ if (!function_exists('is_negative')) {
      *
      * @return bool
      */
-    function is_negative($number): bool
+    function is_negative(mixed $number): bool
     {
         return is_numeric($number) && $number < 0;
     }
@@ -87,7 +87,7 @@ if (!function_exists('is_negative_or_zero')) {
      *
      * @return bool
      */
-    function is_negative_or_zero($number): bool
+    function is_negative_or_zero(mixed $number): bool
     {
         return is_numeric($number) && $number <= 0;
     }
@@ -99,7 +99,7 @@ if (!function_exists('is_positive')) {
      *
      * @return bool
      */
-    function is_positive($number): bool
+    function is_positive(mixed $number): bool
     {
         return is_numeric($number) && $number > 0;
     }
@@ -111,7 +111,7 @@ if (!function_exists('is_positive_or_zero')) {
      *
      * @return bool
      */
-    function is_positive_or_zero($number): bool
+    function is_positive_or_zero(mixed $number): bool
     {
         return is_numeric($number) && $number >= 0;
     }
@@ -119,13 +119,13 @@ if (!function_exists('is_positive_or_zero')) {
 
 if (!function_exists('calculate_age')) {
     /**
-     * @param Carbon|string      $dateOfBirth
-     * @param Carbon|string|null $dateTill
+     * @param string|Carbon      $dateOfBirth
+     * @param string|Carbon|null $dateTill
      * @param bool               $todayIncluded
      *
      * @return int|null
      */
-    function calculate_age($dateOfBirth, $dateTill = null, bool $todayIncluded = true): ?int
+    function calculate_age(Carbon|string $dateOfBirth, Carbon|string $dateTill = null, bool $todayIncluded = true): int|null
     {
         try {
             $dateTill    = Carbon::parse($dateTill, app_timezone());
@@ -133,7 +133,7 @@ if (!function_exists('calculate_age')) {
             return $todayIncluded
                 ? Carbon::parse($dateOfBirth)->diffInYears($dateTill)
                 : Carbon::parse($dateOfBirth)->diffInYears($dateTill->subDay());
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return null;
         }
     }
@@ -141,14 +141,14 @@ if (!function_exists('calculate_age')) {
 
 if (!function_exists('is_age_acceptable')) {
     /**
-     * @param Carbon|string      $dateOfBirth 'Y-m-d'
-     * @param Carbon|string|null $dateTill    'Y-m-d'
+     * @param string|Carbon      $dateOfBirth 'Y-m-d'
+     * @param string|Carbon|null $dateTill    'Y-m-d'
      * @param string             $operator    "<", "lt", "<=", "le", ">", "gt", ">=", "ge", "==", "=", "eq", "!=", "<>", "ne"
      * @param int                $criteria    '16'
      *
      * @return bool|null
      */
-    function is_age_acceptable($dateOfBirth, $dateTill = null, string $operator = '<=', int $criteria = 16): ?bool
+    function is_age_acceptable(Carbon|string $dateOfBirth, Carbon|string $dateTill = null, string $operator = '<=', int $criteria = 16): bool|null
     {
         try {
             $age = calculate_age(
@@ -168,7 +168,7 @@ if (!function_exists('is_age_acceptable')) {
             //                '>='  => $age >= $criteria,
             //                '<=>' => $age <=> $criteria,
             //            };
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return null;
         }
     }
@@ -176,11 +176,11 @@ if (!function_exists('is_age_acceptable')) {
 
 if (!function_exists('number_to_words')) {
     /**
-     * @param int|float|string $number
+     * @param float|int|string $number
      *
      * @return string
      */
-    function number_to_words($number): string
+    function number_to_words(float|int|string $number): string
     {
         try {
             $number = str_replace(',', '', $number);
@@ -190,7 +190,7 @@ if (!function_exists('number_to_words')) {
             $spell     = strtolower($spell);
 
             return $spell;
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return '';
         }
     }
@@ -198,28 +198,38 @@ if (!function_exists('number_to_words')) {
 
 if (!function_exists('get_percentage_of_value')) {
     /**
-     * @param $current
-     * @param $total
+     * @param float|int|string $current
+     * @param float|int|string $total
      *
-     * @return float|int
+     * @return float|int|string
      */
-    function get_percentage_of_value($current, $total)
+    function get_percentage_of_value(float|int|string $current, float|int|string $total): float|int|string
     {
-        if ($total == 0) return 0;
+        if (!(is_numeric($current) && is_numeric($total))) {
+            return 0;
+        }
+        if (is_zero($total)) {
+            return 0;
+        }
         return ($current / $total) * 100;
     }
 }
 
 if (!function_exists('get_value_of_percentage')) {
     /**
-     * @param $percentage
-     * @param $total
+     * @param float|int|string $percentage
+     * @param float|int|string $total
      *
-     * @return float|int
+     * @return float|int|string
      */
-    function get_value_of_percentage($percentage, $total)
+    function get_value_of_percentage(float|int|string $percentage, float|int|string $total): float|int|string
     {
-        if ($percentage == 0) return 0;
+        if (!(is_numeric($percentage) && is_numeric($total))) {
+            return 0;
+        }
+        if (is_zero($percentage)) {
+            return 0;
+        }
         return ($percentage / 100) * $total;
     }
 }
@@ -231,10 +241,10 @@ if (!function_exists('get_total_from_amount_n_percentage')) {
      *
      * @return float|int
      */
-    function get_total_from_amount_n_percentage($amount, $percentage)
+    function get_total_from_amount_n_percentage(float|int|string $amount, float|int|string $percentage): float|int|string
     {
-        if ($amount == 0) return 0;
-        if ($percentage == 0) return 0;
+        if (is_zero($amount)) return 0;
+        if (is_zero($percentage)) return 0;
         return ($amount / $percentage) * 100;
     }
 }
@@ -1375,13 +1385,13 @@ if (!function_exists('pagination_stats')) {
 
         $page  = $currentPage;
         $start = $page == 1 ? $page : ((($page - 1) * $perPage) + 1);
-        $start = $total == 0 ? $total : ($start > $total ? 0 : $start);
-        $end   = $start == 0 ? $start : ($total < $perPage ? $total : (min($total, ($page * $perPage))));
+        $start = is_zero($total) ? $total : ($start > $total ? 0 : $start);
+        $end   = is_zero($start) ? $start : ($total < $perPage ? $total : (min($total, ($page * $perPage))));
         // $total < $perPage ? $total : ($total < ($page * $perPage) ? $total : ($page * $perPage))
 
         //        $page = !isset(request()->page) ? 1 : (request()->page < 1 ? 1 : request()->page);
         //        $start = $page == 1 ? 1 : ((($page - 1) * $perPage) + 1);
-        //        $start = $total == 0 ? 0 : ( $start > $total ? 0 : $start );
+        //        $start = is_zero($total) ? 0 : ( $start > $total ? 0 : $start );
         //        $end = $total < $perPage ? ( $total < ($page * $perPage) ? 0 : $total) : ($total < ($page * $perPage) ? $total : ($page * $perPage));
 
         return [

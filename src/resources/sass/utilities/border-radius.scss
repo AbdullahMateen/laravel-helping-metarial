@@ -1,0 +1,51 @@
+$start: 0;
+$end: 25;
+
+$radiuses: "";
+
+@for $i from $start + 1 through $end {
+  $radiuses: append($radiuses, $i, comma);
+  $radiuses: set-nth($radiuses, 1, $start);
+}
+
+@each $value in $radiuses {
+  .br-#{$value}px {
+    border-radius: #{$value}px !important;
+  }
+
+  .br-tl-#{$value}px {
+    border-top-left-radius: #{$value}px !important;
+  }
+
+  .br-tr-#{$value}px {
+    border-top-right-radius: #{$value}px !important;
+  }
+
+  .br-bl-#{$value}px {
+    border-bottom-left-radius: #{$value}px !important;
+  }
+
+  .br-br-#{$value}px {
+    border-bottom-right-radius: #{$value}px !important;
+  }
+
+  .br-t-#{$value}px {
+    border-top-left-radius: #{$value}px !important;
+    border-top-right-radius: #{$value}px !important;
+  }
+
+  .br-b-#{$value}px {
+    border-bottom-left-radius: #{$value}px !important;
+    border-bottom-right-radius: #{$value}px !important;
+  }
+
+  .br-l-#{$value}px {
+    border-top-left-radius: #{$value}px !important;
+    border-bottom-left-radius: #{$value}px !important;
+  }
+
+  .br-r-#{$value}px {
+    border-top-right-radius: #{$value}px !important;
+    border-bottom-right-radius: #{$value}px !important;
+  }
+}

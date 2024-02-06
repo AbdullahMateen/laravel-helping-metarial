@@ -1,0 +1,35 @@
+$start: 0;
+$end: 10;
+
+$i: $start;
+@while $i <= $end {
+
+  $value: #{$i};
+  $value: str-replace($value, '.', '');
+
+  .p-#{$value}rem {
+    padding: #{$i}rem !important;
+  }
+  .pt-#{$value}rem {
+    padding-top: #{$i}rem !important;
+  }
+  .pb-#{$value}rem {
+    padding-bottom: #{$i}rem !important;
+  }
+  .pl-#{$value}rem {
+    padding-left: #{$i}rem !important;
+  }
+  .pr-#{$value}rem {
+    padding-right: #{$i}rem !important;
+  }
+  .px-#{$value}rem {
+    padding-left: #{$i}rem !important;
+    padding-right: #{$i}rem !important;
+  }
+  .py-#{$value}rem {
+    padding-top: #{$i}rem !important;
+    padding-bottom: #{$i}rem !important;
+  }
+
+  $i: $i + 0.1;
+}

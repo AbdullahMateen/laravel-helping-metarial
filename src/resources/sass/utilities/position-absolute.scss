@@ -1,0 +1,37 @@
+$start: 0;
+$end: 100;
+
+$values: "";
+
+@for $i from $start + 1 through $end {
+  $values: append($values, $i, comma);
+  $values: set-nth($values, 1, $start);
+}
+
+@each $value in $values {
+  .pa-t-#{$value}px {
+    top: #{$value}px;
+  }
+  .pa-b-#{$value}px {
+    bottom: #{$value}px;
+  }
+  .pa-l-#{$value}px {
+    left: #{$value}px;
+  }
+  .pa-r-#{$value}px {
+    right: #{$value}px;
+  }
+
+  .pa-t-n#{$value}px {
+    top: #{$value}px;
+  }
+  .pa-b-n#{$value}px {
+    bottom: #{$value}px;
+  }
+  .pa-l-n#{$value}px {
+    left: #{$value}px;
+  }
+  .pa-r-n#{$value}px {
+    right: #{$value}px;
+  }
+}

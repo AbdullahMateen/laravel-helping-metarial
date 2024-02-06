@@ -1,0 +1,31 @@
+$start: 1;
+$end: 50;
+
+$font-sizes: "";
+
+@for $i from $start + 1 through $end {
+  $font-sizes: append($font-sizes, $i, comma);
+  $font-sizes: set-nth($font-sizes, 1, $start);
+}
+
+@each $value in $font-sizes {
+  .font-size-#{$value}px {
+    font-size: #{$value}px !important;
+  }
+}
+
+$start: 0.1;
+$end: 10;
+
+$i: $start;
+@while $i <= $end {
+
+  $value: #{$i};
+  $value: str-replace($value, '.', '');
+
+  .font-size-#{$value}rem {
+    font-size: #{$value}rem !important;
+  }
+
+  $i: $i + 0.1;
+}

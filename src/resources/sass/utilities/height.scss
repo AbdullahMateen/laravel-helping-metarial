@@ -1,0 +1,46 @@
+$start: 1;
+$end: 500;
+
+$heights: "";
+
+@for $i from $start + 1 through $end {
+  $heights: append($heights, $i, comma);
+  $heights: set-nth($heights, 1, $start);
+}
+
+@each $value in $heights {
+  .h-#{$value}px {
+    height: #{$value}px;
+  }
+  .max-h-#{$value}px {
+    max-height: #{$value}px;
+  }
+  .min-h-#{$value}px {
+    min-height: #{$value}px;
+  }
+}
+
+@each $value in $widths {
+  .h-#{$value}p {
+    height: #{$value} + '%' !important;
+  }
+  .max-h-#{$value}p {
+    max-height: #{$value} + '%' !important;
+  }
+  .min-h-#{$value}p {
+    min-height: #{$value} + '%' !important;
+  }
+}
+
+$heights: 525, 550, 575, 600, 625, 650, 675, 700, 725, 750, 775, 800, 825, 850, 875, 900, 925, 950, 975, 1000;
+@each $value in $heights {
+  .h-#{$value}px {
+    height: #{$value}px;
+  }
+  .max-h-#{$value}px {
+    max-height: #{$value}px;
+  }
+  .min-h-#{$value}px {
+    min-height: #{$value}px;
+  }
+}

@@ -175,12 +175,12 @@ if (!function_exists('app_locale')) {
 
 if (!function_exists('get_route_name_from_url')) {
     /**
-     * @param Request|string $url
+     * @param string|Request $url
      * @param string         $method
      *
      * @return string
      */
-    function get_route_name_from_url($url, string $method = 'get'): string
+    function get_route_name_from_url(string|Request $url, string $method = 'get'): string
     {
         try {
             if ($url instanceof Request) {
@@ -189,7 +189,7 @@ if (!function_exists('get_route_name_from_url')) {
             }
             $request = app('router')->getRoutes()->match(app('request')->create($url, $method));
             return $request->getName();
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return '';
         }
     }
@@ -197,12 +197,12 @@ if (!function_exists('get_route_name_from_url')) {
 
 if (!function_exists('route_url_to_name')) {
     /**
-     * @param Request|string $url
+     * @param string|Request $url
      * @param string         $method
      *
      * @return string
      */
-    function route_url_to_name(string $url, string $method = 'get'): string
+    function route_url_to_name(string|Request $url, string $method = 'get'): string
     {
         return get_route_name_from_url($url, $method);
     }
@@ -218,7 +218,7 @@ if (!function_exists('is_route_name_exists')) {
     {
         try {
             return Route::has($routeName);
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -264,7 +264,7 @@ if (!function_exists('is_current_route_in')) {
      *
      * @return bool
      */
-    function is_current_route_in($routeNames): bool
+    function is_current_route_in(array|string $routeNames): bool
     {
         $routeNames = is_array($routeNames) ? $routeNames : explode(',', $routeNames);
         return in_array(get_current_route_name(), $routeNames, true);
@@ -279,7 +279,7 @@ if (!function_exists('is_route_url')) {
      */
     function is_route_url(string $wildCardURL): bool
     {
-        return Request::is($wildCardURL);
+        return (new Illuminate\Http\Request)->is($wildCardURL);
     }
 }
 
@@ -287,7 +287,7 @@ if (!function_exists('clear_intended_url')) {
     /**
      * @return void
      */
-    function clear_intended_url()
+    function clear_intended_url(): void
     {
         session()->forget('url.intended');
     }
@@ -300,7 +300,7 @@ if (!function_exists('logout_auth_user')) {
      *
      * @return RedirectResponse
      */
-    function logout_auth_user(?Request $request = null, $redirectTo = 'index'): RedirectResponse
+    function logout_auth_user(Request|null $request = null, mixed $redirectTo = 'index'): RedirectResponse
     {
         $redirect = redirect(filter_var($redirectTo, FILTER_VALIDATE_URL) ? $redirectTo : route($redirectTo));
         try {
@@ -310,7 +310,7 @@ if (!function_exists('logout_auth_user')) {
             $redirect = (new LoginController())->logout($request ?? request());
             clear_intended_url();
             return $redirect;
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return $redirect;
         }
     }
@@ -323,14 +323,14 @@ if (!function_exists('goto_route_encrypt')) {
      *
      * @return string|null
      */
-    function goto_route_encrypt(string $routeName, array $parameters = []): ?string
+    function goto_route_encrypt(string $routeName, array $parameters = []): string|null
     {
         try {
             if (!is_route_name_exists($routeName)) {
                 return null;
             }
-            return encrypt($routeName . '|:|' . json_encode($parameters));
-        } catch (Exception $exception) {
+            return encrypt($routeName . '|:|' . json_encode($parameters, JSON_THROW_ON_ERROR));
+        } catch (Exception) {
             return null;
         }
     }
@@ -346,8 +346,8 @@ if (!function_exists('goto_route_decrypt')) {
     {
         try {
             $route = explode('|:|', decrypt($hash));
-            return route($route[0], json_decode($route[1], true)); //  [$routeName = $route[0], $routeParameters = json_decode($route[1], true)];
-        } catch (Exception $exception) {
+            return route($route[0], json_decode($route[1], true, 512, JSON_THROW_ON_ERROR)); //  [$routeName = $route[0], $routeParameters = json_decode($route[1], true)];
+        } catch (Exception) {
             return null;
         }
     }
@@ -368,12 +368,12 @@ if (!function_exists('app_logo')) {
     function app_logo(string $logo = 'icon', string $theme = 'light'): string
     {
         return match ($logo) {
-            'icon'  => asset("assets/images/$theme/logo.png"),
-            'sm'    => asset("assets/images/$theme/logo.png"),
-            'lg'    => asset("assets/images/$theme/logo.png"),
-            'full'  => asset("assets/images/$theme/logo.png"),
-            'text'  => asset("assets/images/$theme/logo.png"),
-            default => asset("assets/images/$theme/logo.png"),
+            'icon'  => asset("assets/images/$theme/logo1.png"),
+            'sm'    => asset("assets/images/$theme/logo2.png"),
+            'lg'    => asset("assets/images/$theme/logo3.png"),
+            'full'  => asset("assets/images/$theme/logo4.png"),
+            'text'  => asset("assets/images/$theme/logo5.png"),
+            default => asset("assets/images/$theme/logo6.png"),
         };
     }
 }
@@ -442,7 +442,7 @@ if (!function_exists('is_api')) {
             $req    = $request ?? request();
             $header = $header ?? '';
             return isset($req) && $req->hasHeader($header);
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -450,11 +450,11 @@ if (!function_exists('is_api')) {
 
 if (!function_exists('get_morphs_maps')) {
     /**
-     * @param Model|string|null $class
+     * @param string|Model|null $class
      *
      * @return false|int|string|string[]
      */
-    function get_morphs_maps($class = null)
+    function get_morphs_maps(Model|string $class = null): array|bool|int|string
     {
         $maps = [
             'app' => 'app',
@@ -472,16 +472,18 @@ if (!function_exists('get_morphs_maps')) {
 
 if (!function_exists('get_model_table')) {
     /**
-     * @param Model|string $model
+     * @param string|Model $model
      *
      * @return string|null
      */
-    function get_model_table($model): ?string
+    function get_model_table(Model|string $model): string|null
     {
         try {
-            if (is_string($model)) $model = (new $model);
+            if (is_string($model)) {
+                $model = (new $model);
+            }
             return $model->getTable();
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return null;
         }
     }

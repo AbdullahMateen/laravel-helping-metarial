@@ -1,0 +1,7 @@
+$font-weights: inherit, bold, bolder, lighter, normal, initial, revert, unset, 100, 200, 300, 400, 500, 600, 700, 800, 900;
+
+@each $value in $font-weights {
+  .font-weight-#{$value} {
+    font-weight: #{$value} !important;
+  }
+}

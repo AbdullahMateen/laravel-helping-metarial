@@ -1,9 +1,11 @@
 <?php
 
-use App\Models\Media;
+use AbdullahMateen\LaravelHelpingMaterial\Models\Media;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use App\Services\Media\MediaService;
+use AbdullahMateen\LaravelHelpingMaterial\Services\Media\MediaService;
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,15 +18,16 @@ use App\Services\Media\MediaService;
 if (!function_exists('get_enums')) {
     /**
      * @param string $key value,name
+     * @param string $baseEnumFolderPath
      *
      * @return array
      */
-    function get_enums(string $key = 'value', $baseEnumFolderPath = 'App\Enums'): array
+    function get_enums(string $key = 'value', string $baseEnumFolderPath = 'App\Enums'): array
     {
         $enums  = [];
 
         $folders = explode('\\', $baseEnumFolderPath);
-        $app = array_shift($folders);
+        array_shift($folders);
         $folders = implode('\\', array_map('ucwords', $folders));
 
         $files = File::allFiles(app_path($folders));
@@ -56,7 +59,8 @@ if (!function_exists('filesystems_setup')) {
      *
      * @return array{disks: array, links: array}
      */
-    function filesystems_setup(bool $shared = false, ?string $sharedPath = null): array
+    #[ArrayShape(['disks' => "array", 'links' => "array"])]
+    function filesystems_setup(bool $shared = false, string|null $sharedPath = null): array
     {
         $disks  = [];
         $shared = isset($sharedPath) && $shared;
@@ -71,8 +75,8 @@ if (!function_exists('filesystems_setup')) {
         foreach (Media::DISKS as $key => $value) {
             $disks[$key] = [
                 'driver'     => 'local',
-                'root'       => storage_path("app/{$key}"),
-                'url'        => app_asset_url() . "/media/{$value}",
+                'root'       => storage_path("app/$key"),
+                'url'        => app_asset_url() . "/media/$value",
                 'visibility' => 'public',
             ];
 
@@ -105,12 +109,18 @@ if (!function_exists('is_media_type_image')) {
     function is_media_type_image(string $string): bool
     {
         try {
-            if ($string === Media::KEY_CATEGORY_IMAGE) return true;
-            if (strpos($string, ' image/') !== false) return true;
-            if (in_array(strtolower($string), MediaService::$imageExtensions)) return true;
+            if ($string === Media::KEY_CATEGORY_IMAGE) {
+                return true;
+            }
+            if (str_contains($string, ' image/')) {
+                return true;
+            }
+            if (in_array(strtolower($string), MediaService::$imageExtensions)) {
+                return true;
+            }
 
             return false;
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -125,11 +135,15 @@ if (!function_exists('is_media_type_video')) {
     function is_media_type_video(string $string): bool
     {
         try {
-            if ($string === Media::KEY_CATEGORY_VIDEO) return true;
-            if (in_array(strtolower($string), MediaService::$videoExtensions)) return true;
+            if ($string === Media::KEY_CATEGORY_VIDEO) {
+                return true;
+            }
+            if (in_array(strtolower($string), MediaService::$videoExtensions)) {
+                return true;
+            }
 
             return false;
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -144,11 +158,15 @@ if (!function_exists('is_media_type_document')) {
     function is_media_type_document(string $string): bool
     {
         try {
-            if ($string === Media::KEY_CATEGORY_DOCUMENT) return true;
-            if (in_array(strtolower($string), MediaService::$documentExtensions)) return true;
+            if ($string === Media::KEY_CATEGORY_DOCUMENT) {
+                return true;
+            }
+            if (in_array(strtolower($string), MediaService::$documentExtensions)) {
+                return true;
+            }
 
             return false;
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -163,11 +181,15 @@ if (!function_exists('is_media_type_archive')) {
     function is_media_type_archive(string $string): bool
     {
         try {
-            if ($string === Media::KEY_CATEGORY_ARCHIVE) return true;
-            if (in_array(strtolower($string), MediaService::$archiveExtensions)) return true;
+            if ($string === Media::KEY_CATEGORY_ARCHIVE) {
+                return true;
+            }
+            if (in_array(strtolower($string), MediaService::$archiveExtensions)) {
+                return true;
+            }
 
             return false;
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -179,16 +201,25 @@ if (!function_exists('is_media_type_of')) {
      *
      * @return string|null
      */
-    function is_media_type_of(string $string)
+    #[Pure]
+    function is_media_type_of(string $string): string|null
     {
         try {
-            if (is_media_type_image($string)) return Media::KEY_CATEGORY_IMAGE;
-            if (is_media_type_video($string)) return Media::KEY_CATEGORY_VIDEO;
-            if (is_media_type_document($string)) return Media::KEY_CATEGORY_DOCUMENT;
-            if (is_media_type_archive($string)) return Media::KEY_CATEGORY_ARCHIVE;
+            if (is_media_type_image($string)) {
+                return Media::KEY_CATEGORY_IMAGE;
+            }
+            if (is_media_type_video($string)) {
+                return Media::KEY_CATEGORY_VIDEO;
+            }
+            if (is_media_type_document($string)) {
+                return Media::KEY_CATEGORY_DOCUMENT;
+            }
+            if (is_media_type_archive($string)) {
+                return Media::KEY_CATEGORY_ARCHIVE;
+            }
 
             return null;
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return null;
         }
     }

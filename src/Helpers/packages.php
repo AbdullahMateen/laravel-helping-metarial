@@ -15,7 +15,7 @@ if (!function_exists('impersonate_manager')) {
     /**
      * @return Application|mixed
      */
-    function impersonate_manager()
+    function impersonate_manager(): mixed
     {
         return app('impersonate');
     }
@@ -59,7 +59,7 @@ if (!function_exists('is_impersonating')) {
     /**
      * @return mixed
      */
-    function is_impersonating()
+    function is_impersonating(): mixed
     {
         return impersonate_manager()->isImpersonating();
     }
@@ -69,7 +69,7 @@ if (!function_exists('leave_impersonate')) {
     /**
      * @return mixed
      */
-    function leave_impersonate()
+    function leave_impersonate(): mixed
     {
         return impersonate_manager()->leave();
     }
@@ -79,7 +79,7 @@ if (!function_exists('get_impersonator_id')) {
     /**
      * @return mixed
      */
-    function get_impersonator_id()
+    function get_impersonator_id(): mixed
     {
         return impersonate_manager()->getImpersonatorId();
     }
