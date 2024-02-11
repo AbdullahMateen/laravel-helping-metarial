@@ -16,18 +16,19 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Imagick\Driver;
+use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
 
 class MediaService
 {
     use ImageTrait, AudioTrait, VideoTrait, DocumentTrait, ArchiveTrait;
 
-    private bool                 $useOriginalName = false;
-    private ?MediaTypeEnum       $mediaType       = null;
-    private ?UploadedFile        $media           = null;
-    private MediaDiskEnum|string $disk            = 'public';
-    private string               $path            = '';
-    private bool                 $thumbnail       = true;
+    private bool                    $useOriginalName = false;
+    private ?MediaTypeEnum          $mediaType       = null;
+    private UploadedFile|Image|null $media           = null;
+    private MediaDiskEnum|string    $disk            = 'public';
+    private string                  $path            = '';
+    private bool                    $thumbnail       = true;
 
 
     /**
@@ -107,9 +108,9 @@ class MediaService
     }
 
     /**
-     * @return UploadedFile
+     * @return UploadedFile|Image|null
      */
-    public function media(): UploadedFile
+    public function media(): UploadedFile|Image|null
     {
         return $this->media;
     }
@@ -119,7 +120,7 @@ class MediaService
      *
      * @return $this
      */
-    public function setMedia(UploadedFile $media): static
+    public function setMedia(UploadedFile|Image|null $media): static
     {
         $this->media = $media;
         return $this;
@@ -183,7 +184,6 @@ class MediaService
     }
 
     /**
-     * @param UploadedFile        $media
      * @param Closure|string|null $name you will get 2 parameters <br> 1. $filename: actual file name without extension, <br> 2. $extension: actual file extension, <br> and you will return full name with extension e.g. example.png
      *
      * @return array|null
@@ -231,8 +231,8 @@ class MediaService
     {
         // $media = Image::make($this->media());
         $manager = new ImageManager(new Driver());
-        $media = $manager->read(file_get_contents($this->media()));
-        $media = $callback($media);
+        $media   = $manager->read(file_get_contents($this->media()));
+        $media   = $callback($media);
         if (!isset($media)) {
             return $this;
         }
