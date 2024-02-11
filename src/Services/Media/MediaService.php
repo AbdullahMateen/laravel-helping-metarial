@@ -23,13 +23,16 @@ class MediaService
 {
     use ImageTrait, AudioTrait, VideoTrait, DocumentTrait, ArchiveTrait;
 
-    private bool                    $useOriginalName = false;
-    private ?MediaTypeEnum          $mediaType       = null;
-    private UploadedFile|Image|null $media           = null;
-    private MediaDiskEnum|string    $disk            = 'public';
-    private string                  $path            = '';
-    private bool                    $thumbnail       = true;
-    private                         $data            = null;
+    private bool                    $useOriginalName  = false;
+    private ?MediaTypeEnum          $mediaType        = null;
+    private UploadedFile|Image|null $media            = null;
+    private UploadedFile|Image|null $file             = null;
+    private UploadedFile|Image|null $fileThumb        = null;
+    private MediaDiskEnum|string    $disk             = 'public';
+    private string                  $path             = '';
+    private bool                    $thumbnail        = false;
+    private array|null              $mediaInformation = null;
+    private                         $data             = null;
 
 
     /**
@@ -60,7 +63,7 @@ class MediaService
     {
         $mediaType = $mediaType ?? $this->mediaType();
         return match ($mediaType) {
-            MediaTypeEnum::Image    => self::$imageExtensions,
+            MediaTypeEnum::Image    => $this->imageExtensions,
             MediaTypeEnum::Audio    => self::$audioExtensions,
             MediaTypeEnum::Video    => self::$videoExtensions,
             MediaTypeEnum::Document => self::$documentExtensions,
@@ -80,7 +83,7 @@ class MediaService
         $extensions = array_unique(array_map('strtolower', is_array($extensions) ? $extensions : explode(',', $extensions)));
         $mediaType  = $mediaType ?? $this->mediaType();
         match ($mediaType) {
-            MediaTypeEnum::Image    => self::$imageExtensions = $extensions,
+            MediaTypeEnum::Image    => $this->imageExtensions = $extensions,
             MediaTypeEnum::Audio    => self::$audioExtensions = $extensions,
             MediaTypeEnum::Video    => self::$videoExtensions = $extensions,
             MediaTypeEnum::Document => self::$documentExtensions = $extensions,
@@ -124,6 +127,8 @@ class MediaService
     public function setMedia(UploadedFile|Image|null $media): static
     {
         $this->media = $media;
+        $this->getMediaInfo($media);
+        $this->resolveMediaTypeByExtension();
         return $this;
     }
 
@@ -161,24 +166,24 @@ class MediaService
      */
     public function setPath(string $path): static
     {
-        $this->path = $path;
+        $this->path = trim($path, '/\\');
         return $this;
     }
 
     /**
-     * @return bool
+     * @return Closure|bool
      */
-    public function thumbnail(): bool
+    public function thumbnail(): Closure|bool
     {
         return $this->thumbnail;
     }
 
     /**
-     * @param bool $thumbnail
+     * @param bool $thumbnail if FALSE means no thumbnail, if TRUE means generate thumbnail with default settings or Closure means give custom setting use Intervention api
      *
      * @return $this
      */
-    public function setThumbnail(bool $thumbnail): static
+    public function setThumbnail(Closure|bool $thumbnail): static
     {
         $this->thumbnail = $thumbnail;
         return $this;
@@ -211,7 +216,7 @@ class MediaService
                 }
             }
 
-            return [
+            return $this->mediaInformation = [
                 'original'    => $fileNameWithExt,
                 'name'        => $fileName,
                 'extension'   => $extension,
@@ -234,7 +239,6 @@ class MediaService
             return $this;
         }
 
-        // $manager = new ImageManager(new Driver());
         $manager = ImageManager::gd();
         $media   = $manager->read(file_get_contents($this->media()));
         $media   = $callback($media);
@@ -242,7 +246,7 @@ class MediaService
             return $this;
         }
 
-        $this->setMedia($media);
+        $this->file = $media;
         return $this;
     }
 
@@ -251,9 +255,9 @@ class MediaService
      */
     public function store(): ?array
     {
-        $mediaInfo = $this->getMediaInfo($this->media());
-        if (in_array(strtolower($mediaInfo['extension']), self::$imageExtensions, true)) {
-            return array_merge(self::StoreImage($this->media(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Image->value]);
+        $mediaInfo = $this->mediaInformation;
+        if (in_array(strtolower($mediaInfo['extension']), $this->imageExtensions, true)) {
+            return array_merge($this->storeImage(/*$this->media(), $this->disk(), $this->path(), $this->thumbnail()*/), ['media_type' => MediaTypeEnum::Image->value]);
         }
         if (in_array(strtolower($mediaInfo['extension']), self::$audioExtensions, true)) {
             return array_merge(self::StoreAudio($this->media(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Audio->value]);
@@ -269,6 +273,18 @@ class MediaService
         }
 
         return null;
+    }
+
+    private function resolveMediaTypeByExtension(string $extension = null): void
+    {
+        $extension = strtolower($extension ?? $this->mediaInformation['extension']);
+        $this->setMediaType(match (true) {
+            in_array($extension, $this->imageExtensions, true) => MediaTypeEnum::Image,
+            in_array($extension, self::$audioExtensions)       => MediaTypeEnum::Audio,
+            in_array($extension, self::$videoExtensions)       => MediaTypeEnum::Video,
+            in_array($extension, self::$documentExtensions)    => MediaTypeEnum::Document,
+            in_array($extension, self::$archiveExtensions)     => MediaTypeEnum::Archive,
+        });
     }
 
 

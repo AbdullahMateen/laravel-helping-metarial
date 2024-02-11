@@ -9,74 +9,70 @@ use Intervention\Image\Image;
 
 trait ImageTrait
 {
-    public static array $imageExtensions = ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'svg', 'webp'];
+    public array $imageExtensions = ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'svg', 'webp'];
 
-    public static function StoreImage(mixed $media, string $disk, string $path = '', bool $generateThumb = true, bool $isPublic = true)
+    public function storeImage()
     {
-        $path      = trim($path, '/\\');
-        $mediaData = ['isset' => false];
-        $thumbData = ['isset' => false];
-
-        if (!isset($media)) return [
-            'result'    => false,
-            'media'     => null,
-            'thumb'     => null,
-            'type'      => null,
-            'extension' => null,
-        ];
-
-        $mediaInfo = self::getMediaInfo($media);
-        $filename = self::isUseOriginalName() ? $mediaInfo['full_name'] : $mediaInfo['unique_name'];
+        $disk      = $this->disk();
+        $path      = $this->path();
+        $mediaInfo = $this->mediaInformation;
+        $filename = $mediaInfo['final_name'];
 
         if (!Storage::disk($disk)->directoryExists($path)) {
             File::makeDirectory(storage_path("app/$disk/$path"), 0755, true);
         }
 
-        $mediaData = self::GenerateImage($media, $disk, $path, $filename);
-        if ($generateThumb && in_array(strtolower($mediaInfo['extension']), self::$imageExtensions)) {
-            $thumbData = self::GenerateImageThumb($media, $disk, $path, $filename);
+        $mediaData = $this->generateImage($this->media(), $path, $disk, $filename);
+        if ($this->thumbnail()) {
+            $thumbData = $this->generateImageThumb($this->media(), $path, $disk, $filename);
         }
 
-        return $data = [
+        return [
             'result'    => true,
             'media'     => $mediaData,
             'thumb'     => $thumbData,
-            'type'      => Storage::disk($disk)->mimeType($path != '' ? "$path/$filename" : $filename), // mime_content_type($storagePath . $fileNameToStore),
+            'type'      => Storage::disk($disk)->mimeType($path !== '' ? "$path/$filename" : $filename), // mime_content_type($storagePath . $fileNameToStore),
             'extension' => strtolower($mediaInfo['extension']),
         ];
     }
 
-    public static function GenerateImage($media, $disk, $path, $fileNameToStore)
+    public function generateImage($media, $path, $disk, $fileNameToStore)
     {
         $media->storeAs($path, $fileNameToStore, $disk);
 
-        return $data = [
-            'isset' => true,
+        $path = $path !== '' ? "$path/$fileNameToStore" : $fileNameToStore;
+        return [
             'name'  => $fileNameToStore,
-            'path'  => Storage::disk($disk)->path($path != '' ? "$path/$fileNameToStore" : $fileNameToStore),
-            'size'  => Storage::disk($disk)->size($path != '' ? "$path/$fileNameToStore" : $fileNameToStore),
-            'url'   => Storage::disk($disk)->url($path != '' ? "$path/$fileNameToStore" : $fileNameToStore),
+            'path'  => Storage::disk($disk)->path($path),
+            'size'  => Storage::disk($disk)->size($path),
+            'url'   => Storage::disk($disk)->url($path),
         ];
     }
 
-    public static function GenerateImageThumb($media, $disk, $path, $fileNameToStore, $width = 200, $height = 200, $isPublic = true)
+    public function generateImageThumb($media, $path, $disk, $fileNameToStore, $width = 200, $height = 200)
     {
         ini_set('memory_limit', '1000M');
-        $fileNameToStore = 'thumb_' . $fileNameToStore;
 
-        $media = Image::make($media)->resize($width, $height, function ($constraint) {
-            $constraint->aspectRatio();
-        });
+        $fileNameToStore = "thumb_$fileNameToStore";
+
+        if ($this->thumbnail() instanceof \Closure) {
+            $media = $this->thumbnail()($media);
+        } else {
+            $media = Image::make($media)->resize($width, $height, function ($constraint) {
+                $constraint->aspectRatio();
+            });
+        }
+
         $media->stream();
-        $path = $path != '' ? "$path/" : $path;
+        $path = $path !== '' ? "$path/" : $path;
         Storage::disk($disk)->put($path . $fileNameToStore, $media);
 
-        return $data = [
-            'isset' => true,
+        $path = $path !== '' ? "$path/$fileNameToStore" : $fileNameToStore;
+        return [
             'name'  => $fileNameToStore,
-            'path'  => Storage::disk($disk)->path($path != '' ? "$path/$fileNameToStore" : $fileNameToStore),
-            'size'  => Storage::disk($disk)->size($path != '' ? "$path/$fileNameToStore" : $fileNameToStore),
-            'url'   => Storage::disk($disk)->url($path != '' ? "$path/$fileNameToStore" : $fileNameToStore),
+            'path'  => Storage::disk($disk)->path($path),
+            'size'  => Storage::disk($disk)->size($path),
+            'url'   => Storage::disk($disk)->url($path),
         ];
     }
 
