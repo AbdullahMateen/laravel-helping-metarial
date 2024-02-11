@@ -42,7 +42,6 @@
             ],
             "aliases": {
                 "MediaService": "AbdullahMateen\\LaravelHelpingMaterial\\Facades\\MediaServiceFacade",
-                "Image": "Intervention\\Image\\ImageManagerStatic"
             }
         }
     },

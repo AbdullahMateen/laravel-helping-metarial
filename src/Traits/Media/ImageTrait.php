@@ -5,7 +5,7 @@ namespace AbdullahMateen\LaravelHelpingMaterial\Traits\Media;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Image;
+use Intervention\Image\ImageManager;
 
 trait ImageTrait
 {
@@ -30,7 +30,7 @@ trait ImageTrait
         return [
             'result'    => true,
             'media'     => $mediaData,
-            'thumb'     => $thumbData,
+            'thumb'     => $thumbData ?? [],
             'type'      => Storage::disk($disk)->mimeType($path !== '' ? "$path/$filename" : $filename), // mime_content_type($storagePath . $fileNameToStore),
             'extension' => strtolower($mediaInfo['extension']),
         ];
@@ -55,17 +55,14 @@ trait ImageTrait
 
         $fileNameToStore = "thumb_$fileNameToStore";
 
+        $media = ImageManager::gd()->read($media);
         if ($this->thumbnail() instanceof \Closure) {
             $media = $this->thumbnail()($media);
         } else {
-            $media = Image::make($media)->resize($width, $height, function ($constraint) {
-                $constraint->aspectRatio();
-            });
+            $media = $media->resize($width, $height);
         }
 
-        $media->stream();
-        $path = $path !== '' ? "$path/" : $path;
-        Storage::disk($disk)->put($path . $fileNameToStore, $media);
+        $media->save(Storage::disk($disk)->path("$path/$fileNameToStore"));
 
         $path = $path !== '' ? "$path/$fileNameToStore" : $fileNameToStore;
         return [

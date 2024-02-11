@@ -23,16 +23,16 @@ class MediaService
 {
     use ImageTrait, AudioTrait, VideoTrait, DocumentTrait, ArchiveTrait;
 
-    private bool                    $useOriginalName  = false;
-    private ?MediaTypeEnum          $mediaType        = null;
-    private UploadedFile|Image|null $media            = null;
-    private UploadedFile|Image|null $file             = null;
-    private UploadedFile|Image|null $fileThumb        = null;
-    private MediaDiskEnum|string    $disk             = 'public';
-    private string                  $path             = '';
-    private bool                    $thumbnail        = false;
-    private array|null              $mediaInformation = null;
-    private                         $data             = null;
+    private bool                           $useOriginalName  = false;
+    private ?MediaTypeEnum                 $mediaType        = null;
+    private UploadedFile|Image|string|null $media            = null;
+    private UploadedFile|Image|string|null $file             = null;
+    private UploadedFile|Image|string|null $fileThumb        = null;
+    private MediaDiskEnum|string           $disk             = 'public';
+    private string                         $path             = '';
+    private Closure|bool                   $thumbnail        = false;
+    private array|null                     $mediaInformation = null;
+    private                                $data             = null;
 
 
     /**
@@ -112,9 +112,9 @@ class MediaService
     }
 
     /**
-     * @return UploadedFile|Image|null
+     * @return UploadedFile|Image|string|null
      */
-    public function media(): UploadedFile|Image|null
+    public function media(): UploadedFile|Image|string|null
     {
         return $this->media;
     }
@@ -124,10 +124,13 @@ class MediaService
      *
      * @return $this
      */
-    public function setMedia(UploadedFile|Image|null $media): static
+    public function setMedia(UploadedFile|Image|string|null $media): static
     {
+        if (is_string($media)) {
+            $media = new UploadedFile($media, last(explode('/', $media)), mime_content_type($media));
+        }
         $this->media = $media;
-        $this->getMediaInfo($media);
+        $this->getMediaInfo();
         $this->resolveMediaTypeByExtension();
         return $this;
     }
@@ -179,7 +182,7 @@ class MediaService
     }
 
     /**
-     * @param bool $thumbnail if FALSE means no thumbnail, if TRUE means generate thumbnail with default settings or Closure means give custom setting use Intervention api
+     * @param Closure|bool $thumbnail if FALSE means no thumbnail, if TRUE means generate thumbnail with default settings or Closure means give custom setting use Intervention api
      *
      * @return $this
      */
