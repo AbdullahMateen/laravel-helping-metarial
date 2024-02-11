@@ -29,6 +29,7 @@ class MediaService
     private MediaDiskEnum|string    $disk            = 'public';
     private string                  $path            = '';
     private bool                    $thumbnail       = true;
+    private                         $data            = null;
 
 
     /**
@@ -229,8 +230,12 @@ class MediaService
      */
     public function intervention(Closure $callback): static
     {
-        // $media = Image::make($this->media());
-        $manager = new ImageManager(new Driver());
+        if ($this->mediaType() !== MediaTypeEnum::Image) {
+            return $this;
+        }
+
+        // $manager = new ImageManager(new Driver());
+        $manager = ImageManager::gd();
         $media   = $manager->read(file_get_contents($this->media()));
         $media   = $callback($media);
         if (!isset($media)) {
@@ -250,18 +255,19 @@ class MediaService
         if (in_array(strtolower($mediaInfo['extension']), self::$imageExtensions, true)) {
             return array_merge(self::StoreImage($this->media(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Image->value]);
         }
-        if (in_array(strtolower($mediaInfo['extension']), self::$imageExtensions, true)) {
+        if (in_array(strtolower($mediaInfo['extension']), self::$audioExtensions, true)) {
             return array_merge(self::StoreAudio($this->media(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Audio->value]);
         }
-        if (in_array(strtolower($mediaInfo['extension']), self::$imageExtensions, true)) {
+        if (in_array(strtolower($mediaInfo['extension']), self::$videoExtensions, true)) {
             return array_merge(self::StoreVideo($this->media(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Video->value]);
         }
-        if (in_array(strtolower($mediaInfo['extension']), self::$imageExtensions, true)) {
+        if (in_array(strtolower($mediaInfo['extension']), self::$documentExtensions, true)) {
             return array_merge(self::StoreDocument($this->media(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Document->value]);
         }
-        if (in_array(strtolower($mediaInfo['extension']), self::$imageExtensions, true)) {
+        if (in_array(strtolower($mediaInfo['extension']), self::$archiveExtensions, true)) {
             return array_merge(self::StoreArchive($this->media(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Archive->value]);
         }
+
         return null;
     }
 
