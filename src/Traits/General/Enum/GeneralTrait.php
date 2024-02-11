@@ -149,6 +149,9 @@ trait GeneralTrait
         return self::PRIMARY_CLASS;
     }
 
+    /**
+     * @return string
+     */
     public function colorCode(): string
     {
         $value     = strtoupper($this->color());

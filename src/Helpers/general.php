@@ -57,6 +57,18 @@ if (!function_exists('human_readable_number')) {
     }
 }
 
+if (!function_exists('is_set')) {
+    /**
+     * @param mixed $value
+     *
+     * @return bool
+     */
+    function is_set(mixed $value): bool
+    {
+        return isset($value) && !empty($value);
+    }
+}
+
 if (!function_exists('is_zero')) {
     /**
      * @param mixed $number
