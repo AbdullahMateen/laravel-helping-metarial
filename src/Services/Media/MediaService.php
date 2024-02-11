@@ -230,7 +230,7 @@ class MediaService
     public function intervention(Closure $callback): static
     {
         // $media = Image::make($this->media());
-        $manager = new ImageManager(new Driver());
+        $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
         $media = $manager->read($this->media());
         $media = $callback($media);
         if (!isset($media)) {
