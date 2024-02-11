@@ -15,7 +15,8 @@ use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use Image;
+use Intervention\Image\Drivers\Imagick\Driver;
+use Intervention\Image\ImageManager;
 
 class MediaService
 {
@@ -228,7 +229,9 @@ class MediaService
      */
     public function intervention(Closure $callback): static
     {
-        $media = Image::make($this->media());
+        // $media = Image::make($this->media());
+        $manager = new ImageManager(new Driver());
+        $media = $manager->read($this->media());
         $media = $callback($media);
         if (!isset($media)) {
             return $this;
