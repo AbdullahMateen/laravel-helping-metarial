@@ -17,8 +17,8 @@ trait VideoTrait
 
         if (!isset($media)) return [
             'result'    => false,
-            'media'     => $mediaData,
-            'thumb'     => $thumbData,
+            'media'     => null,
+            'thumb'     => null,
             'type'      => null,
             'extension' => null,
         ];

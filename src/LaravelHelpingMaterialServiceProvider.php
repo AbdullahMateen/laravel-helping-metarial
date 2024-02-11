@@ -2,8 +2,8 @@
 
 namespace AbdullahMateen\LaravelHelpingMaterial;
 
-use AbdullahMateen\LaravelHelpingMaterial\Enums\StatusEnum;
 use AbdullahMateen\LaravelHelpingMaterial\Middleware\Custom\AuthorizationMiddleware;
+use AbdullahMateen\LaravelHelpingMaterial\Services\Media\MediaService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Blade;
@@ -26,19 +26,23 @@ class LaravelHelpingMaterialServiceProvider extends ServiceProvider
     {
         $this->app['router']->aliasMiddleware('authorize', AuthorizationMiddleware::class);
 
-        Model::preventLazyLoading(!$this->app->isProduction());
+         Model::preventLazyLoading(!$this->app->isProduction());
 
         Relation::enforceMorphMap(get_morphs_maps());
 
         $this->bootDirectories();
         $this->bootDirectives();
+
+        $this->app->bind('MediaService', function () {
+            return new MediaService();
+        });
     }
 
     private function bootDirectories()
     {
-        if (!File::exists(public_path('media'))) {
-            File::makeDirectory(public_path('media'), 0777, true);
-        }
+//        if (!File::exists(public_path('media'))) {
+//            File::makeDirectory(public_path('media'), 0777, true);
+//        }
     }
 
     private function bootDirectives()

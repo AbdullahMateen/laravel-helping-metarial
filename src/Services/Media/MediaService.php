@@ -7,6 +7,7 @@ use AbdullahMateen\LaravelHelpingMaterial\Traits\Media\ArchiveTrait;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\Media\DocumentTrait;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\Media\ImageTrait;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\Media\VideoTrait;
+use Exception;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,30 +15,37 @@ class MediaService
 {
     use ImageTrait, VideoTrait, DocumentTrait, ArchiveTrait;
 
-    private static bool $useOriginalName = false;
+    private bool $useOriginalName = false;
 
-    public static function getMediaInfo($media = null)
+    /**
+     * @param mixed $media
+     *
+     * @return array|null
+     */
+    public function getMediaInfo(mixed $media): ?array
     {
-        if (!isset($media)) return null;
+        if (!isset($media)) {
+            return null;
+        }
 
         try {
             $fileNameWithExt = $media->getClientOriginalName();
             $fileName        = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
             $extension       = $media->getClientOriginalExtension();
-            $fileNameToStore = uniqid('', true) . '_' . time() . '.' . $extension;
+            $fileNameToStore = sprintf('%s_%s.%s', uniqid('', true), time(), $extension);
 
             return [
+                'original'    => $fileNameWithExt,
                 'name'        => $fileName,
                 'extension'   => $extension,
-                'full_name'   => $fileNameWithExt,
                 'unique_name' => $fileNameToStore,
             ];
-        } catch (\Exception $exception) {
+        } catch (Exception) {
             return null;
         }
     }
 
-    public static function StoreMedia($media, $disk, $path = '', $generateThumb = true, $isPublic = true)
+    public function StoreMedia($media, $disk, $path = '', $generateThumb = true, $isPublic = true)
     {
         $mediaInfo = self::getMediaInfo($media);
         if (in_array(strtolower($mediaInfo['extension']), self::$imageExtensions)) return array_merge(self::StoreImage($media, $disk, $path, $generateThumb, $isPublic), ['media_type' => Media::KEY_CATEGORY_IMAGE]);
@@ -53,7 +61,7 @@ class MediaService
         return Storage::disk($disk)->delete("$path/$name");
     }
 
-    public static function temp($data, $model = null, $disk = Media::KEY_DISK_TEMP, $group = Media::KEY_GROUP_TEMP)
+    public function temp($data, $model = null, $disk = Media::KEY_DISK_TEMP, $group = Media::KEY_GROUP_TEMP)
     {
         $media                 = new Media();
         $media->group          = $group;
@@ -74,7 +82,7 @@ class MediaService
         return $media;
     }
 
-    public static function Move($modal, $disk, $value, $path = '', $column = 'media_name')
+    public function Move($modal, $disk, $value, $path = '', $column = 'media_name')
     {
         $media = Media::where($column, '=', $value)->first();
 
@@ -106,7 +114,7 @@ class MediaService
         return $media;
     }
 
-    public static function save($data, $model, $disk = null, $group = null)
+    public function save($data, $model, $disk = null, $group = null)
     {
         $media                 = new Media();
         $media->group          = $group;
@@ -127,7 +135,7 @@ class MediaService
         return $media;
     }
 
-    public static function update($data, $media, $disk = null, $group = null)
+    public function update($data, $media, $disk = null, $group = null)
     {
         $media->group      = $group ?? $media->group;
         $media->category   = $data['media_type'] ?? $media->category;
@@ -146,13 +154,12 @@ class MediaService
     }
 
 
-
     /**
      * @return bool
      */
-    public static function isUseOriginalName(): bool
+    public function isUseOriginalName(): bool
     {
-        return self::$useOriginalName;
+        return (self::class)::useOriginalName;
     }
 
     /**
@@ -160,9 +167,10 @@ class MediaService
      *
      * @return MediaService
      */
-    public static function setUseOriginalName(bool $useOriginalName = false): void
+    public function setUseOriginalName(bool $useOriginalName = true): MediaServiceFunctions
     {
-        self::$useOriginalName = $useOriginalName;
+        $self                  = (new self);
+        $self->useOriginalName = $useOriginalName;
+        return new static();
     }
-
 }

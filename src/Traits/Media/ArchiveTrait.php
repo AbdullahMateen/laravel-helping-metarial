@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Storage;
 
 trait ArchiveTrait
 {
-    public static $archiveExtensions = ['7z', 's7z', 'apk', 'jar', 'rar', 'tar.gz', 'tgz', 'tarZ', 'tar', 'zip', 'zipx'];
+    public static array $archiveExtensions = ['7z', 's7z', 'apk', 'jar', 'rar', 'tar.gz', 'tgz', 'tarZ', 'tar', 'zip', 'zipx'];
 
-    public static function StoreArchive($media, $disk, $path = '', $generateThumb = false, $isPublic = true)
+    public static function StoreArchive(mixed $media, string $disk, string $path = '', bool $generateThumb = false, bool $isPublic = true)
     {
         $mediaData = ['isset' => false];
         $thumbData = ['isset' => false];

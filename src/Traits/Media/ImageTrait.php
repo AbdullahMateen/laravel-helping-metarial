@@ -3,23 +3,24 @@
 namespace AbdullahMateen\LaravelHelpingMaterial\Traits\Media;
 
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\Image;
 
 trait ImageTrait
 {
-    public static $imageExtensions = ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'svg', 'webp'];
+    public static array $imageExtensions = ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'svg', 'webp'];
 
-    public static function StoreImage($media, $disk, $path = '', $generateThumb = true, $isPublic = true)
+    public static function StoreImage(mixed $media, string $disk, string $path = '', bool $generateThumb = true, bool $isPublic = true)
     {
-        $path      = trim(trim($path, '/'), '\\');
+        $path      = trim($path, '/\\');
         $mediaData = ['isset' => false];
         $thumbData = ['isset' => false];
 
         if (!isset($media)) return [
             'result'    => false,
-            'media'     => $mediaData,
-            'thumb'     => $thumbData,
+            'media'     => null,
+            'thumb'     => null,
             'type'      => null,
             'extension' => null,
         ];
@@ -28,7 +29,7 @@ trait ImageTrait
         $filename = self::isUseOriginalName() ? $mediaInfo['full_name'] : $mediaInfo['unique_name'];
 
         if (!Storage::disk($disk)->directoryExists($path)) {
-            \File::makeDirectory(storage_path("app/$disk/$path"), 0755, true);
+            File::makeDirectory(storage_path("app/$disk/$path"), 0755, true);
         }
 
         $mediaData = self::GenerateImage($media, $disk, $path, $filename);

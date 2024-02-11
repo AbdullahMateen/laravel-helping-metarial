@@ -11,7 +11,7 @@ trait Encryptable
 {
     /*
         Todo: things that need to be done
-        1) Try to build this functionality for bulk inserts functions
+        1) Try to build this functionality for bulk inserts functions - edit: cannot do that
         2) Try to make two encryption types like ['unique', 'fixed'],
             Unique: will generate unique encryption everytime for same string
             Fixed: will generate same encryption everytime for same string

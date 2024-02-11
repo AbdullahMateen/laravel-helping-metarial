@@ -2,11 +2,12 @@
 
 namespace AbdullahMateen\LaravelHelpingMaterial\Rules;
 
+use Closure;
 use Illuminate\Cache\RateLimiter;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Http\Request;
 
-class Throttle implements Rule
+class Throttle implements ValidationRule
 {
     protected $rule = 'limiter';
 
@@ -24,6 +25,12 @@ class Throttle implements Rule
         $this->maxAttempts = $maxAttempts;
         $this->decayInMinutes = $decayInMinutes;
         $this->message = $message;
+    }
+
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        // TODO: Implement validate() method.
+        if (!$this->passes($attribute, $value)) $fail($this->message());
     }
 
     public function passes($attribute, $value)
