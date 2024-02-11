@@ -41,7 +41,8 @@
                 "AbdullahMateen\\LaravelHelpingMaterial\\LaravelHelpingMaterialServiceProvider"
             ],
             "aliases": {
-                "MediaService": "AbdullahMateen\\LaravelHelpingMaterial\\Facades\\MediaServiceFacade"
+                "MediaService": "AbdullahMateen\\LaravelHelpingMaterial\\Facades\\MediaServiceFacade",
+                "Image": "Intervention\\Image\\ImageManagerStatic"
             }
         }
     },
