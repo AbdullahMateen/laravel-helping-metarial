@@ -24,7 +24,7 @@ trait DocumentTrait
             'extension' => null,
         ];
 
-        $mediaInfo = self::getMediaInfo($media);
+        $mediaInfo = self::captureFileInformation($media);
         $filename = self::isUseOriginalName() ? $mediaInfo['full_name'] : $mediaInfo['unique_name'];
 
         $mediaData = self::GenerateDocument($media, $disk, $path, $filename);

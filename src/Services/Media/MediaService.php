@@ -15,144 +15,72 @@ use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Traits\Tappable;
 use Intervention\Image\Drivers\Imagick\Driver;
 use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
 
 class MediaService
 {
-    use ImageTrait, AudioTrait, VideoTrait, DocumentTrait, ArchiveTrait;
+    use ImageTrait, AudioTrait, VideoTrait, DocumentTrait, ArchiveTrait, Tappable;
 
-    private bool                           $useOriginalName  = false;
-    private ?MediaTypeEnum                 $mediaType        = null;
-    private UploadedFile|Image|string|null $media            = null;
-    private UploadedFile|Image|string|null $file             = null;
-    private UploadedFile|Image|string|null $fileThumb        = null;
-    private MediaDiskEnum|string           $disk             = 'public';
-    private string                         $path             = '';
-    private Closure|bool                   $thumbnail        = false;
-    private array|null                     $mediaInformation = null;
-    private                                $data             = null;
+    /*
+    |--------------------------------------------------------------------------
+    | Properties
+    |--------------------------------------------------------------------------
+    */
 
+    private Closure|bool $name = false;
+
+    private string $path = '';
+
+    private MediaDiskEnum|string $disk = 'public';
+
+    private MediaTypeEnum|null $mediaType = null;
+
+    private UploadedFile|Image|string|null $originalFile = null;
+
+    private UploadedFile|Image|string|null $file = null;
+
+    private UploadedFile|Image|string|null $fileThumb = null;
+
+    private Closure|bool $thumbnail = false;
+
+    private array|null $extensions = null;
+
+    private array|null $fileInformation = null;
+
+    private array|null $data = null;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Setters / Getters
+    |--------------------------------------------------------------------------
+    */
+
+    /* ==================== name ==================== */
 
     /**
-     * @return MediaTypeEnum|null
+     * @return Closure|bool
      */
-    public function mediaType(): ?MediaTypeEnum
+    public function name(): Closure|bool
     {
-        return $this->mediaType;
+        return $this->name;
     }
 
     /**
-     * @param MediaTypeEnum|null $mediaType
+     * @param Closure|bool $name False: use system generated unique name, <br> True: use original file name <br> Closure(string $filename, string $extension): provide custom filename string
      *
      * @return $this
      */
-    public function setMediaType(?MediaTypeEnum $mediaType = null): static
+    public function setName(Closure|bool $name = false): static
     {
-        $this->mediaType = $mediaType;
+        $this->name = $name;
         return $this;
     }
 
-    /**
-     * @param MediaTypeEnum|null $mediaType
-     *
-     * @return array
-     */
-    public function allowedExtensions(?MediaTypeEnum $mediaType = null): array
-    {
-        $mediaType = $mediaType ?? $this->mediaType();
-        return match ($mediaType) {
-            MediaTypeEnum::Image    => $this->imageExtensions,
-            MediaTypeEnum::Audio    => self::$audioExtensions,
-            MediaTypeEnum::Video    => self::$videoExtensions,
-            MediaTypeEnum::Document => self::$documentExtensions,
-            MediaTypeEnum::Archive  => self::$archiveExtensions,
-            default                 => [],
-        };
-    }
-
-    /**
-     * @param array|string  $extensions
-     * @param MediaTypeEnum $type
-     *
-     * @return $this
-     */
-    public function setAllowedExtensions(array|string $extensions, ?MediaTypeEnum $mediaType = null): static
-    {
-        $extensions = array_unique(array_map('strtolower', is_array($extensions) ? $extensions : explode(',', $extensions)));
-        $mediaType  = $mediaType ?? $this->mediaType();
-        match ($mediaType) {
-            MediaTypeEnum::Image    => $this->imageExtensions = $extensions,
-            MediaTypeEnum::Audio    => self::$audioExtensions = $extensions,
-            MediaTypeEnum::Video    => self::$videoExtensions = $extensions,
-            MediaTypeEnum::Document => self::$documentExtensions = $extensions,
-            MediaTypeEnum::Archive  => self::$archiveExtensions = $extensions,
-        };
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function useOriginalName(): bool
-    {
-        return $this->useOriginalName;
-    }
-
-    /**
-     * @param bool $useOriginalName
-     *
-     * @return $this
-     */
-    public function setUseOriginalName(bool $useOriginalName = true): static
-    {
-        $this->useOriginalName = $useOriginalName;
-        return $this;
-    }
-
-    /**
-     * @return UploadedFile|Image|string|null
-     */
-    public function media(): UploadedFile|Image|string|null
-    {
-        return $this->media;
-    }
-
-    /**
-     * @param UploadedFile $media
-     *
-     * @return $this
-     */
-    public function setMedia(UploadedFile|Image|string|null $media): static
-    {
-        if (is_string($media)) {
-            $media = new UploadedFile($media, last(explode('/', $media)), mime_content_type($media));
-        }
-        $this->media = $media;
-        $this->getMediaInfo();
-        $this->resolveMediaTypeByExtension();
-        return $this;
-    }
-
-    /**
-     * @return MediaDiskEnum|string
-     */
-    public function disk(): MediaDiskEnum|string
-    {
-        return $this->disk;
-    }
-
-    /**
-     * @param MediaDiskEnum|string $disk
-     *
-     * @return $this
-     */
-    public function setDisk(MediaDiskEnum|string $disk): static
-    {
-        $this->disk = $disk;
-        return $this;
-    }
+    /* ==================== path ==================== */
 
     /**
      * @return string
@@ -173,6 +101,72 @@ class MediaService
         return $this;
     }
 
+    /* ==================== disk ==================== */
+
+    /**
+     * @return MediaDiskEnum|string
+     */
+    public function disk(): MediaDiskEnum|string
+    {
+        return $this->disk;
+    }
+
+    /**
+     * @param MediaDiskEnum|string $disk
+     *
+     * @return $this
+     */
+    public function setDisk(MediaDiskEnum|string $disk): static
+    {
+        $this->disk = $disk;
+        return $this;
+    }
+
+    /* ==================== media type ==================== */
+
+    /**
+     * @return MediaTypeEnum|null
+     */
+    public function mediaType(): MediaTypeEnum|null
+    {
+        return $this->mediaType;
+    }
+
+    /**
+     * @param MediaTypeEnum|null $mediaType
+     *
+     * @return $this
+     */
+    public function setMediaType(MediaTypeEnum|null $mediaType = null): static
+    {
+        $this->mediaType = $mediaType;
+        return $this;
+    }
+
+    /* ==================== file ==================== */
+
+    /**
+     * @return UploadedFile|Image|string|null
+     */
+    public function file(): UploadedFile|Image|string|null
+    {
+        return $this->originalFile;
+    }
+
+    /**
+     * @param UploadedFile|Image|string|null $originalFile
+     *
+     * @return $this
+     */
+    public function setFile(UploadedFile|Image|string|null $originalFile): static
+    {
+        $this->originalFile = $this->resolveFile($originalFile);
+        $this->captureFileInformation()->resolveMediaTypeByExtension();
+        return $this;
+    }
+
+    /* ==================== thumbnail ==================== */
+
     /**
      * @return Closure|bool
      */
@@ -182,7 +176,7 @@ class MediaService
     }
 
     /**
-     * @param Closure|bool $thumbnail if FALSE means no thumbnail, if TRUE means generate thumbnail with default settings or Closure means give custom setting use Intervention api
+     * @param Closure|bool $thumbnail False: don't generate thumbnail, <br> True: generate thumbnail with default settings <br> Closure(\Intervention\Image\Interfaces\ImageInterface $media) using Intervention api to generate thumb
      *
      * @return $this
      */
@@ -192,47 +186,92 @@ class MediaService
         return $this;
     }
 
+    /* ==================== allowed extensions ==================== */
+
     /**
-     * @param Closure|string|null $name you will get 2 parameters <br> 1. $filename: actual file name without extension, <br> 2. $extension: actual file extension, <br> and you will return full name with extension e.g. example.png
+     * @return array
+     */
+    public function extensions(): array
+    {
+        return $this->extensions ?? $this->mediaType()?->extensions();
+        //        $mediaType = $mediaType ?? $this->mediaType();
+        //        return match ($mediaType) {
+        //            MediaTypeEnum::Image    => $this->imageExtensions,
+        //            MediaTypeEnum::Audio    => self::$audioExtensions,
+        //            MediaTypeEnum::Video    => self::$videoExtensions,
+        //            MediaTypeEnum::Document => self::$documentExtensions,
+        //            MediaTypeEnum::Archive  => self::$archiveExtensions,
+        //            default                 => [],
+        //        };
+    }
+
+    /**
+     * @param array|string $extensions
+     * @param bool         $merge
      *
+     * @return $this
+     */
+    public function setExtensions(array|string $extensions, bool $merge = false): static
+    {
+        $this->extensions = $this->refineExtensions($extensions, $merge);
+        return $this;
+        //        $mediaType  = $mediaType ?? $this->mediaType();
+        //        match ($mediaType) {
+        //            MediaTypeEnum::Image    => $this->imageExtensions = $extensions,
+        //            MediaTypeEnum::Audio    => self::$audioExtensions = $extensions,
+        //            MediaTypeEnum::Video    => self::$videoExtensions = $extensions,
+        //            MediaTypeEnum::Document => self::$documentExtensions = $extensions,
+        //            MediaTypeEnum::Archive  => self::$archiveExtensions = $extensions,
+        //        };
+    }
+
+    /* ==================== file information ==================== */
+
+    /**
      * @return array|null
      */
-    public function getMediaInfo(Closure|string $name = null): ?array
+    public function fileInformation(): ?array
     {
-        //        if (!isset($media)) {
-        //            return null;
-        //        }
+        return $this->fileInformation;
+    }
 
+    /**
+     * @return MediaService
+     */
+    public function captureFileInformation(): static
+    {
         try {
-            $media           = $this->media();
+            $media           = $this->file();
             $fileNameWithExt = $media->getClientOriginalName();
             $fileName        = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
             $extension       = $media->getClientOriginalExtension();
             $uniqueName      = sprintf('%s_%s.%s', uniqid('', true), time(), $extension);
-            $fileNameToStore = $this->useOriginalName() ? $fileNameWithExt : $uniqueName;
 
-            if (isset($name)) {
-                if ($name instanceof Closure) {
-                    $fileNameToStore = $name($fileName, $extension);
-                } elseif (is_string($name)) {
-                    $fileNameToStore = $name;
-                }
-            }
+            $name            = $this->name();
+            $fileNameToStore = match (true) {
+                $name instanceof Closure => $name($fileName, $extension),
+                $name === false          => $uniqueName,
+                $name                    => $fileNameWithExt,
+            };
 
-            return $this->mediaInformation = [
-                'original'    => $fileNameWithExt,
-                'name'        => $fileName,
-                'extension'   => $extension,
-                'unique_name' => $uniqueName,
-                'final_name'  => $fileNameToStore,
+            $this->fileInformation = [
+                '_original'  => $fileNameWithExt,
+                '_name'      => $fileName,
+                '_extension' => $extension,
+                'name'       => $fileNameToStore,
+                'unique'     => $uniqueName,
             ];
         } catch (Exception) {
-            return null;
+            $this->fileInformation = null;
         }
+
+        return $this;
     }
 
+    /* ==================== intervention ==================== */
+
     /**
-     * @param Closure|null $callback
+     * @param Closure $callback Closure(\Intervention\Image\Interfaces\ImageInterface $file) using Intervention api to generate file and return file object
      *
      * @return $this
      */
@@ -242,53 +281,128 @@ class MediaService
             return $this;
         }
 
-        $manager = ImageManager::gd();
-        $media   = $manager->read(file_get_contents($this->media()));
-        $media   = $callback($media);
-        if (!isset($media)) {
+        $file = ImageManager::gd()->read($this->file());
+        $file = $callback($file);
+        if (!isset($file)) {
             return $this;
         }
 
-        $this->file = $media;
+        $this->file = $file;
         return $this;
     }
+
+    /* ==================== helpers ==================== */
+
+    /**
+     * @param Image|string|UploadedFile|null $originalFile
+     *
+     * @return Image|UploadedFile
+     */
+    private function resolveFile(Image|string|UploadedFile|null $originalFile): Image|UploadedFile
+    {
+        return match (true) {
+            $originalFile instanceof UploadedFile, $originalFile instanceof Image => $originalFile,
+            File::exists($originalFile)                                           => path_to_uploaded_file($originalFile),
+            is_valid_url($originalFile)                                           => url_to_uploaded_file($originalFile, 'temporary.png'),
+            is_base64_image($originalFile)                                        => base64_to_uploaded_file($originalFile, 'temporary.png'),
+        };
+    }
+
+    /**
+     * @param string|null $extension
+     *
+     * @return void
+     */
+    private function resolveMediaTypeByExtension(string $extension = null): void
+    {
+        $extension = strtolower($extension ?? $this->fileInformation['_extension']);
+        $this->setMediaType(match (true) {
+            in_array($extension, MediaTypeEnum::Image->extensions(), true) => MediaTypeEnum::Image,
+            in_array($extension, self::$audioExtensions)                   => MediaTypeEnum::Audio,
+            in_array($extension, self::$videoExtensions)                   => MediaTypeEnum::Video,
+            in_array($extension, self::$documentExtensions)                => MediaTypeEnum::Document,
+            in_array($extension, self::$archiveExtensions)                 => MediaTypeEnum::Archive,
+        });
+    }
+
+    /**
+     * @param array|string $extensions
+     * @param bool         $merge
+     *
+     * @return array|null
+     */
+    private function refineExtensions(array|string $extensions, bool $merge = false): array|null
+    {
+        $extensions = array_unique(
+            array_filter(
+                array_map('strtolower', is_array($extensions) ? $extensions : explode(',', $extensions))
+            )
+        );
+
+        if ($merge) {
+            $extensions = array_merge($this->mediaType()?->extensions(), $extensions);
+        }
+
+        return empty($extensions) ? null : $extensions;
+    }
+
+    /**
+     * @param bool    $condition
+     * @param Closure $callback
+     *
+     * @return $this
+     */
+    private function when(bool $condition, Closure $callback): static
+    {
+        if ($condition) {
+            $callback($this);
+        }
+        return $this;
+    }
+
+    /* ==================== store to filesystem ==================== */
 
     /**
      * @return array|null
      */
-    public function store(): ?array
+    public function storeAs($path = null, $filename = null): ?array
     {
-        $mediaInfo = $this->mediaInformation;
-        if (in_array(strtolower($mediaInfo['extension']), $this->imageExtensions, true)) {
-            return array_merge($this->storeImage(/*$this->media(), $this->disk(), $this->path(), $this->thumbnail()*/), ['media_type' => MediaTypeEnum::Image->value]);
-        }
-        if (in_array(strtolower($mediaInfo['extension']), self::$audioExtensions, true)) {
-            return array_merge(self::StoreAudio($this->media(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Audio->value]);
-        }
-        if (in_array(strtolower($mediaInfo['extension']), self::$videoExtensions, true)) {
-            return array_merge(self::StoreVideo($this->media(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Video->value]);
-        }
-        if (in_array(strtolower($mediaInfo['extension']), self::$documentExtensions, true)) {
-            return array_merge(self::StoreDocument($this->media(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Document->value]);
-        }
-        if (in_array(strtolower($mediaInfo['extension']), self::$archiveExtensions, true)) {
-            return array_merge(self::StoreArchive($this->media(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Archive->value]);
-        }
+        $fileInfo = $this
+            ->when(isset($path), fn () => $this->setPath($path))
+            ->when(isset($filename), fn () => $this->setName(fn ($firstname, $extension) => $filename))
+            ->captureFileInformation()->fileInformation();
 
-        return null;
+        return match (true) {
+            in_array(strtolower($fileInfo['_extension']), $this->extensions(), true) => array_merge($this->storeImage(), ['media_type' => MediaTypeEnum::Image]),
+            default                                                                  => null,
+        };
+
+        //        if (in_array(strtolower($mediaInfo['extension']), $this->imageExtensions, true)) {
+        //            return array_merge($this->storeImage(/*$this->media(), $this->disk(), $this->path(), $this->thumbnail()*/), ['media_type' => MediaTypeEnum::Image->value]);
+        //        }
+        //        if (in_array(strtolower($mediaInfo['extension']), self::$audioExtensions, true)) {
+        //            return array_merge(self::StoreAudio($this->file(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Audio->value]);
+        //        }
+        //        if (in_array(strtolower($mediaInfo['extension']), self::$videoExtensions, true)) {
+        //            return array_merge(self::StoreVideo($this->file(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Video->value]);
+        //        }
+        //        if (in_array(strtolower($mediaInfo['extension']), self::$documentExtensions, true)) {
+        //            return array_merge(self::StoreDocument($this->file(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Document->value]);
+        //        }
+        //        if (in_array(strtolower($mediaInfo['extension']), self::$archiveExtensions, true)) {
+        //            return array_merge(self::StoreArchive($this->file(), $this->disk(), $this->path(), $this->thumbnail()), ['media_type' => MediaTypeEnum::Archive->value]);
+        //        }
+        //        return null;
     }
 
-    private function resolveMediaTypeByExtension(string $extension = null): void
-    {
-        $extension = strtolower($extension ?? $this->mediaInformation['extension']);
-        $this->setMediaType(match (true) {
-            in_array($extension, $this->imageExtensions, true) => MediaTypeEnum::Image,
-            in_array($extension, self::$audioExtensions)       => MediaTypeEnum::Audio,
-            in_array($extension, self::$videoExtensions)       => MediaTypeEnum::Video,
-            in_array($extension, self::$documentExtensions)    => MediaTypeEnum::Document,
-            in_array($extension, self::$archiveExtensions)     => MediaTypeEnum::Archive,
-        });
-    }
+
+
+
+
+
+
+
+
 
 
     //    public function storeMedia($media, $disk, $path = '', $generateThumb = true, $isPublic = true)

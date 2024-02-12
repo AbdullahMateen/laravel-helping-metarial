@@ -22,7 +22,7 @@ trait ArchiveTrait
             'extension' => null,
         ];
 
-        $mediaInfo = self::getMediaInfo($media);
+        $mediaInfo = self::captureFileInformation($media);
         $filename = self::isUseOriginalName() ? $mediaInfo['full_name'] : $mediaInfo['unique_name'];
 
         $mediaData = self::GenerateArchive($media, $disk, $path, $filename);

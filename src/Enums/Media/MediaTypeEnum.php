@@ -16,6 +16,20 @@ enum MediaTypeEnum: int implements ColorsCodeInterface
     case Archive = 5;
 
     /**
+     * @return array|string[]
+     */
+    public function extensions(): array
+    {
+        return match ($this) {
+            self::Image    => ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'svg', 'webp'],
+            self::Audio    => [],
+            self::Video    => [],
+            self::Document => [],
+            self::Archive  => [],
+        };
+    }
+
+    /**
      * @return string
      */
     public function toString(): string

@@ -1,6 +1,9 @@
 <?php
 
+use AbdullahMateen\LaravelHelpingMaterial\Enums\Media\MediaDiskEnum;
+use AbdullahMateen\LaravelHelpingMaterial\Enums\Media\MediaTypeEnum;
 use AbdullahMateen\LaravelHelpingMaterial\Models\Media;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use AbdullahMateen\LaravelHelpingMaterial\Services\Media\MediaService;
@@ -24,7 +27,7 @@ if (!function_exists('get_enums')) {
      */
     function get_enums(string $key = 'value', string $baseEnumFolderPath = 'App\Enums'): array
     {
-        $enums  = [];
+        $enums = [];
 
         $folders = explode('\\', $baseEnumFolderPath);
         array_shift($folders);
@@ -45,8 +48,6 @@ if (!function_exists('get_enums')) {
         return array_merge_recursive(...$enums);
     }
 }
-
-
 
 
 /* ==================== Storage Link ==================== */
@@ -72,7 +73,10 @@ if (!function_exists('filesystems_setup')) {
             $links = [public_path('media/public') => storage_path('app/public')];
         }
 
-        foreach (Media::DISKS as $key => $value) {
+        foreach (MediaDiskEnum::cases() as $enum) {
+            $key   = strtolower($enum->value);
+            $value = $key;
+
             $disks[$key] = [
                 'driver'     => 'local',
                 'root'       => storage_path("app/$key"),
@@ -96,8 +100,6 @@ if (!function_exists('filesystems_setup')) {
 }
 
 
-
-
 /* ==================== Media ==================== */
 
 if (!function_exists('is_media_type_image')) {
@@ -109,13 +111,36 @@ if (!function_exists('is_media_type_image')) {
     function is_media_type_image(string $string): bool
     {
         try {
-            if ($string === Media::KEY_CATEGORY_IMAGE) {
+            if ($string === strtolower(MediaTypeEnum::Image->name)) {
                 return true;
             }
             if (str_contains($string, ' image/')) {
                 return true;
             }
-            if (in_array(strtolower($string), MediaService::$imageExtensions)) {
+            if (in_array(strtolower($string), MediaTypeEnum::Image->extensions())) {
+                return true;
+            }
+
+            return false;
+        } catch (Exception) {
+            return false;
+        }
+    }
+}
+
+if (!function_exists('is_media_type_audio')) {
+    /**
+     * @param string $string
+     *
+     * @return bool
+     */
+    function is_media_type_audio(string $string): bool
+    {
+        try {
+            if ($string === strtolower(MediaTypeEnum::Audio->name)) {
+                return true;
+            }
+            if (in_array(strtolower($string), MediaTypeEnum::Audio->extensions())) {
                 return true;
             }
 
@@ -135,10 +160,10 @@ if (!function_exists('is_media_type_video')) {
     function is_media_type_video(string $string): bool
     {
         try {
-            if ($string === Media::KEY_CATEGORY_VIDEO) {
+            if ($string === strtolower(MediaTypeEnum::Video->name)) {
                 return true;
             }
-            if (in_array(strtolower($string), MediaService::$videoExtensions)) {
+            if (in_array(strtolower($string), MediaTypeEnum::Video->extensions())) {
                 return true;
             }
 
@@ -158,10 +183,10 @@ if (!function_exists('is_media_type_document')) {
     function is_media_type_document(string $string): bool
     {
         try {
-            if ($string === Media::KEY_CATEGORY_DOCUMENT) {
+            if ($string === strtolower(MediaTypeEnum::Document->name)) {
                 return true;
             }
-            if (in_array(strtolower($string), MediaService::$documentExtensions)) {
+            if (in_array(strtolower($string), MediaTypeEnum::Document->extensions())) {
                 return true;
             }
 
@@ -181,10 +206,10 @@ if (!function_exists('is_media_type_archive')) {
     function is_media_type_archive(string $string): bool
     {
         try {
-            if ($string === Media::KEY_CATEGORY_ARCHIVE) {
+            if ($string === strtolower(MediaTypeEnum::Archive->name)) {
                 return true;
             }
-            if (in_array(strtolower($string), MediaService::$archiveExtensions)) {
+            if (in_array(strtolower($string), MediaTypeEnum::Archive->extensions())) {
                 return true;
             }
 
@@ -205,22 +230,147 @@ if (!function_exists('is_media_type_of')) {
     function is_media_type_of(string $string): string|null
     {
         try {
-            if (is_media_type_image($string)) {
-                return Media::KEY_CATEGORY_IMAGE;
-            }
-            if (is_media_type_video($string)) {
-                return Media::KEY_CATEGORY_VIDEO;
-            }
-            if (is_media_type_document($string)) {
-                return Media::KEY_CATEGORY_DOCUMENT;
-            }
-            if (is_media_type_archive($string)) {
-                return Media::KEY_CATEGORY_ARCHIVE;
-            }
-
-            return null;
+            return strtolower(match (true) {
+                is_media_type_image($string)    => MediaTypeEnum::Image->name,
+                is_media_type_audio($string)    => MediaTypeEnum::Audio->name,
+                is_media_type_video($string)    => MediaTypeEnum::Video->name,
+                is_media_type_document($string) => MediaTypeEnum::Document->name,
+                is_media_type_archive($string)  => MediaTypeEnum::Archive->name,
+                default => null
+            });
         } catch (Exception) {
             return null;
         }
     }
 }
+
+if (!function_exists('is_base64_image')) {
+    /**
+     * @param string $base64
+     *
+     * @return bool
+     */
+    function is_base64_image(string $base64): bool
+    {
+        // Remove data URI scheme if present
+        $data = preg_replace('#^data:image/[^;]+;base64,#', '', $base64);
+
+        // Decode the base64 string
+        $decodedData = base64_decode($data, true);
+
+        // Check if the decoding was successful and the result is an image
+        return ($decodedData !== false) && (getimagesizefromstring($decodedData) !== false);
+    }
+}
+
+if (!function_exists('is_file_path')) {
+    /**
+     * @param mixed $path
+     *
+     * @return bool
+     */
+    function is_file_path(mixed $path): bool
+    {
+        if (!is_string($path)) {
+            return false;
+        }
+
+        return is_file($path) || is_dir($path);
+    }
+}
+
+if (!function_exists('is_valid_url')) {
+    /**
+     * @param mixed $url
+     *
+     * @return bool
+     */
+    function is_valid_url(mixed $url): bool
+    {
+        if (!is_string($url)) {
+            return false;
+        }
+
+        return filter_var($url, FILTER_VALIDATE_URL) !== false;
+    }
+}
+
+if (!function_exists('base64_to_uploaded_file')) {
+    /**
+     * @param string $base64String
+     * @param string $fileName
+     *
+     * @return UploadedFile
+     */
+    function base64_to_uploaded_file(string $base64String, string $fileName): UploadedFile
+    {
+        // Remove data URI scheme if present
+        $base64String = preg_replace('#^data:image/[^;]+;base64,#', '', $base64String);
+
+        // Decode the base64 string
+        $decodedData = base64_decode($base64String);
+
+        // Generate a temporary file path
+        $tempFilePath = tempnam(sys_get_temp_dir(), 'base64_to_uploaded_file');
+
+        // Write the decoded data to the temporary file
+        file_put_contents($tempFilePath, $decodedData);
+
+        // Create an UploadedFile instance
+        $uploadedFile = new UploadedFile(
+            $tempFilePath,
+            $fileName,
+            mime_content_type($tempFilePath)
+        );
+
+        // Optionally, you can delete the temporary file
+        unlink($tempFilePath);
+
+        return $uploadedFile;
+    }
+}
+
+if (!function_exists('url_to_uploaded_file')) {
+    /**
+     * @param string      $url
+     * @param string|null $fileName
+     *
+     * @return UploadedFile
+     */
+    function url_to_uploaded_file(string $url, string $fileName = null): UploadedFile
+    {
+        $tempFilePath = tempnam(sys_get_temp_dir(), 'url_to_uploaded_file');
+
+        // Download the file from the URL
+        $fileContents = file_get_contents($url);
+        file_put_contents($tempFilePath, $fileContents);
+
+        // Determine file name if not provided
+        $fileName = $fileName ?: basename(parse_url($url, PHP_URL_PATH));
+
+        // Create an UploadedFile instance
+        $uploadedFile = new UploadedFile(
+            $tempFilePath,
+            $fileName,
+            mime_content_type($tempFilePath),
+        );
+
+        // Optionally, you can delete the temporary file
+        unlink($tempFilePath);
+
+        return $uploadedFile;
+    }
+}
+
+if (!function_exists('path_to_uploaded_file')) {
+    /**
+     * @param string $path
+     *
+     * @return UploadedFile
+     */
+    function path_to_uploaded_file(string $path): UploadedFile
+    {
+        return new UploadedFile($path, last(explode('/', $path)), mime_content_type($path));
+    }
+}
+
