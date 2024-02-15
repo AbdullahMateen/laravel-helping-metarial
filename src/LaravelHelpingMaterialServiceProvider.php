@@ -40,9 +40,9 @@ class LaravelHelpingMaterialServiceProvider extends ServiceProvider
 
     private function bootDirectories()
     {
-//        if (!File::exists(public_path('media'))) {
-//            File::makeDirectory(public_path('media'), 0777, true);
-//        }
+        if (!File::exists(public_path('media'))) {
+            File::makeDirectory(public_path('media'), 0777, true);
+        }
     }
 
     private function bootDirectives()

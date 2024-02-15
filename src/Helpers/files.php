@@ -74,7 +74,7 @@ if (!function_exists('filesystems_setup')) {
         }
 
         foreach (MediaDiskEnum::cases() as $enum) {
-            $key   = strtolower($enum->value);
+            $key   = strtolower($enum->name);
             $value = $key;
 
             $disks[$key] = [
@@ -91,6 +91,13 @@ if (!function_exists('filesystems_setup')) {
                 $links[public_path('media/' . $key)] = storage_path('app/' . $value);
             }
         }
+
+        $disks['public'] = [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'url' => env('APP_URL').'/media/public',
+            'visibility' => 'public',
+        ];
 
         return [
             'disks' => $disks,

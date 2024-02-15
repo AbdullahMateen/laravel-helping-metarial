@@ -109,7 +109,7 @@ class MediaService
      */
     public function getDisk(): MediaDiskEnum|string
     {
-        return $this->disk;
+        return $this->disk instanceof MediaDiskEnum ? $this->disk->disk() : $this->disk;
     }
 
     /**
@@ -128,7 +128,7 @@ class MediaService
     /**
      * @return MediaTypeEnum|null
      */
-    public function getMediaType(): MediaTypeEnum|null
+    private function getMediaType(): MediaTypeEnum|null
     {
         return $this->mediaType;
     }
@@ -138,7 +138,7 @@ class MediaService
      *
      * @return $this
      */
-    public function setMediaType(MediaTypeEnum|null $mediaType = null): static
+    private function setMediaType(MediaTypeEnum|null $mediaType = null): static
     {
         $this->mediaType = $mediaType;
         return $this;

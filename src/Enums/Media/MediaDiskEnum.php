@@ -17,6 +17,14 @@ enum MediaDiskEnum: int implements ColorsCodeInterface
     /**
      * @return string
      */
+    public function disk(): string
+    {
+        return strtolower($this->name);
+    }
+
+    /**
+     * @return string
+     */
     public function toString(): string
     {
         return $this->name;
