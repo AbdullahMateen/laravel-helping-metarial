@@ -40,11 +40,12 @@ class MediaService
 
     private UploadedFile|Image|string|null $originalFile = null;
 
-    private UploadedFile|Image|string|null $file = null;
+    private UploadedFile|Image|string|null $file         = null;
+    private Closure|null                   $fileCallback = null;
 
-    private UploadedFile|Image|string|null $fileThumb = null;
-
-    private bool $thumbnail = false;
+    private bool                           $thumbnail         = false;
+    private UploadedFile|Image|string|null $fileThumb         = null;
+    private Closure|null                   $fileThumbCallback = null;
 
     private array|null $extensions = null;
 
@@ -165,6 +166,30 @@ class MediaService
         return $this;
     }
 
+    /**
+     * @param mixed|null $file
+     *
+     * @return $this
+     */
+    private function setFileMutated(mixed $file = null): static
+    {
+        $this->file = $file;
+        $this->fileCallback = null;
+        return $this;
+    }
+
+    /**
+     * @param mixed|null $file
+     *
+     * @return $this
+     */
+    private function setFileThumb(mixed $file = null): static
+    {
+        $this->fileThumb = $file;
+        $this->fileThumbCallback = null;
+        return $this;
+    }
+
     /* ==================== thumbnail ==================== */
 
     /**
@@ -259,14 +284,23 @@ class MediaService
 
     /* ==================== data ==================== */
 
+    /**
+     * @return array
+     */
     public function getData(): array
     {
         return $this->data;
     }
 
-    public function setData(?array $data): MediaService
+    /**
+     * @param array|null $data
+     * @param bool       $fresh
+     *
+     * @return MediaService
+     */
+    private function setData(?array $data, bool $fresh = false): MediaService
     {
-        $this->data = $data;
+        $this->data = $fresh ? $data : [...($this->data ?? []), $data];
         return $this;
     }
 
@@ -277,19 +311,19 @@ class MediaService
      *
      * @return $this
      */
-    public function intervention(Closure $callback): static
+    public function mutate(Closure $callback): static
     {
         if ($this->getMediaType() !== MediaTypeEnum::Image) {
             return $this;
         }
 
-        $file = ImageManager::gd()->read($this->getFile());
-        $file = $callback($file);
-        if (!isset($file)) {
-            return $this;
-        }
+//        $file = ImageManager::gd()->read($this->getFile());
+//        $file = $callback($file);
+//        if (!isset($file)) {
+//            return $this;
+//        }
 
-        $this->file = $file;
+        $this->fileCallback = $callback;
         return $this;
     }
 
@@ -306,13 +340,13 @@ class MediaService
 
         $this->setThumbnail(true);
 
-        $file = ImageManager::gd()->read($this->getFile());
-        $file = $callback($file);
-        if (!isset($file)) {
-            return $this;
-        }
+//        $file = ImageManager::gd()->read($this->getFile());
+//        $file = $callback($file);
+//        if (!isset($file)) {
+//            return $this;
+//        }
 
-        $this->fileThumb = $file;
+        $this->fileThumbCallback = $callback;
         return $this;
     }
 
@@ -381,6 +415,27 @@ class MediaService
         return in_array(strtolower($extension), $this->getExtensions(), true);
     }
 
+
+    /**
+     * @return $this
+     */
+    private function reset(): static
+    {
+        $this
+            // ->setName()
+            // ->setPath()
+            // ->setDisk()
+            // ->setMediaType()
+            ->setFile(null)
+            ->setFileMutated(null)
+            ->setFileThumb(null)
+            // ->setThumbnail()
+            // ->setExtensions()
+        ;
+
+        return $this;
+    }
+
     /**
      * @param bool    $condition
      * @param Closure $callback
@@ -410,8 +465,8 @@ class MediaService
     /* ==================== store to filesystem ==================== */
 
     /**
-     * @param string|null $path
-     * @param string|null $filename
+     * @param string|null               $path
+     * @param string|null               $filename
      * @param MediaDiskEnum|string|null $disk
      *
      * @return $this
@@ -436,7 +491,7 @@ class MediaService
             MediaTypeEnum::Document => array_merge($this->storeDocument(), ['media_type' => MediaTypeEnum::Document]),
             MediaTypeEnum::Archive  => array_merge($this->storeArchive(), ['media_type' => MediaTypeEnum::Archive]),
             default                 => null,
-        });
+        })->reset();
 
         return $this;
     }

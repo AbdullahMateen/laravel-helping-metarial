@@ -18,6 +18,7 @@ trait ImageTrait
      */
     private function storeImage(): array
     {
+        $file     = $this->getFile();
         $disk     = $this->getDisk();
         $path     = $this->getPath();
         $fileInfo = $this->fileInformation();
@@ -27,9 +28,9 @@ trait ImageTrait
             File::makeDirectory(storage_path("app/$disk/$path"), 0755, true);
         }
 
-        $mediaInfo = $this->generateImage($this->file ?? $this->getFile(), $path, $disk, $filename);
+        $mediaInfo = $this->generateImage($file, $path, $disk, $filename);
         if ($this->getThumbnail()) {
-            $thumbInfo = $this->generateImageThumb($this->fileThumb ?? $this->getFile(), $path, $disk, $filename);
+            $thumbInfo = $this->generateImageThumb($file, $path, $disk, $filename);
         }
 
         return [
@@ -51,6 +52,13 @@ trait ImageTrait
      */
     private function generateImage(mixed $media, string $path, string $disk, string $filename): array
     {
+        if (!is_null($this->fileCallback)) {
+            $image = ImageManager::gd()->read($media);
+            $media = ($this->fileCallback)($image) ?? $media;
+            if ($media instanceof Image) {
+                $this->setFileMutated($media);
+            }
+        }
         return $this->saveImage($media, $path, $filename, $disk);
     }
 
@@ -68,8 +76,22 @@ trait ImageTrait
         $filename = "thumb_$filename";
 
         if (!($media instanceof Image) && $this->getThumbnail()) {
-            $media = ImageManager::gd()->read($media);
-            $media = $media->resize(200, 200);
+            $media           = ImageManager::gd()->read($media);
+            $media           = $media->scale(200, 200);
+            $this->fileThumb = $media;
+        }
+
+        if ($this->getThumbnail()) {
+            $image = ImageManager::gd()->read($media);
+            if (!is_null($this->fileThumbCallback)) {
+                $media = ($this->fileThumbCallback)($image) ?? $media;
+                if ($media instanceof Image) {
+                    $this->setFileThumb($media);
+                }
+            } else {
+                $media = $media->scale(200, 200);
+                $this->setFileThumb($media);
+            }
         }
 
         return $this->saveImage($media, $path, $filename, $disk);
