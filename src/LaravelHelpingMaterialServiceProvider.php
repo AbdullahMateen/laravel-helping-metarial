@@ -28,7 +28,9 @@ class LaravelHelpingMaterialServiceProvider extends ServiceProvider
 
          Model::preventLazyLoading(!$this->app->isProduction());
 
-        Relation::enforceMorphMap(get_morphs_maps());
+         if (function_exists('get_morphs_maps')) {
+             Relation::enforceMorphMap(get_morphs_maps());
+         }
 
         $this->bootDirectories();
         $this->bootDirectives();

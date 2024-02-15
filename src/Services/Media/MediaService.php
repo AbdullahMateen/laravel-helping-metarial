@@ -508,7 +508,11 @@ class MediaService
             ->when(isset($path), fn () => $this->setPath($path))
             ->when(isset($filename), fn () => $this->setName(fn ($firstname, $extension) => $filename));
 
-        Storage::disk($this->getDisk())->delete("{$this->getPath()}/{$this->getName()}");
+        $name      = pathinfo($filename, PATHINFO_FILENAME);
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        $name      = $this->getName() instanceof Closure ? ($this->getName())($name, $extension) : $this->getName();
+
+        Storage::disk($this->getDisk())->delete(trim("{$this->getPath()}/$name", '/'));
 
         return $this;
     }
