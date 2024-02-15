@@ -174,7 +174,6 @@ class MediaService
     private function setFileMutated(mixed $file = null): static
     {
         $this->file = $file;
-        $this->fileCallback = null;
         return $this;
     }
 
@@ -186,7 +185,6 @@ class MediaService
     private function setFileThumb(mixed $file = null): static
     {
         $this->fileThumb = $file;
-        $this->fileThumbCallback = null;
         return $this;
     }
 
@@ -311,17 +309,17 @@ class MediaService
      *
      * @return $this
      */
-    public function mutate(Closure $callback): static
+    public function modifying(Closure $callback): static
     {
         if ($this->getMediaType() !== MediaTypeEnum::Image) {
             return $this;
         }
 
-//        $file = ImageManager::gd()->read($this->getFile());
-//        $file = $callback($file);
-//        if (!isset($file)) {
-//            return $this;
-//        }
+        //        $file = ImageManager::gd()->read($this->getFile());
+        //        $file = $callback($file);
+        //        if (!isset($file)) {
+        //            return $this;
+        //        }
 
         $this->fileCallback = $callback;
         return $this;
@@ -340,11 +338,11 @@ class MediaService
 
         $this->setThumbnail(true);
 
-//        $file = ImageManager::gd()->read($this->getFile());
-//        $file = $callback($file);
-//        if (!isset($file)) {
-//            return $this;
-//        }
+        //        $file = ImageManager::gd()->read($this->getFile());
+        //        $file = $callback($file);
+        //        if (!isset($file)) {
+        //            return $this;
+        //        }
 
         $this->fileThumbCallback = $callback;
         return $this;
@@ -426,9 +424,9 @@ class MediaService
             // ->setPath()
             // ->setDisk()
             // ->setMediaType()
-            ->setFile(null)
-            ->setFileMutated(null)
-            ->setFileThumb(null)
+            // ->setFile(null)
+            ->setFileMutated()
+            ->setFileThumb()
             // ->setThumbnail()
             // ->setExtensions()
         ;

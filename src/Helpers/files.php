@@ -265,32 +265,24 @@ if (!function_exists('is_base64_image')) {
 
 if (!function_exists('is_file_path')) {
     /**
-     * @param mixed $path
+     * @param string $path
      *
      * @return bool
      */
-    function is_file_path(mixed $path): bool
+    function is_file_path(string $path): bool
     {
-        if (!is_string($path)) {
-            return false;
-        }
-
         return is_file($path) || is_dir($path);
     }
 }
 
 if (!function_exists('is_valid_url')) {
     /**
-     * @param mixed $url
+     * @param string $url
      *
      * @return bool
      */
-    function is_valid_url(mixed $url): bool
+    function is_valid_url(string $url): bool
     {
-        if (!is_string($url)) {
-            return false;
-        }
-
         return filter_var($url, FILTER_VALIDATE_URL) !== false;
     }
 }
