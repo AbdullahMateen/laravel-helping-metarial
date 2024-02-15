@@ -3,19 +3,23 @@
 namespace AbdullahMateen\LaravelHelpingMaterial\Traits\Media;
 
 
+use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
-use JetBrains\PhpStorm\ArrayShape;
 
 trait ImageTrait
 {
-    public function storeImage()
+    /**
+     * @return array{media: array, thumb: array|null, type: false|string, extension: string}
+     * @throws Exception
+     */
+    private function storeImage(): array
     {
-        $disk     = $this->disk();
-        $path     = $this->path();
+        $disk     = $this->getDisk();
+        $path     = $this->getPath();
         $fileInfo = $this->fileInformation();
         $filename = $fileInfo['name'];
 
@@ -23,10 +27,9 @@ trait ImageTrait
             File::makeDirectory(storage_path("app/$disk/$path"), 0755, true);
         }
 
-        $media     = $this->file ?? $this->file();
-        $mediaInfo = $this->generateImage($media, $path, $disk, $filename);
-        if ($this->thumbnail()) {
-            $thumbInfo = $this->generateImageThumb($media, $path, $disk, $filename);
+        $mediaInfo = $this->generateImage($this->file ?? $this->getFile(), $path, $disk, $filename);
+        if ($this->getThumbnail()) {
+            $thumbInfo = $this->generateImageThumb($this->fileThumb ?? $this->getFile(), $path, $disk, $filename);
         }
 
         return [
@@ -38,47 +41,55 @@ trait ImageTrait
     }
 
     /**
-     * @param $media
-     * @param $path
-     * @param $disk
-     * @param $filename
+     * @param mixed  $media
+     * @param string $path
+     * @param string $disk
+     * @param string $filename
      *
-     * @return array {name: string, path: string, size: int, url: string}
-     * @throws \Exception
+     * @return array{name: string, path: string, size: int, url: string}
+     * @throws Exception
      */
-    public function generateImage($media, $path, $disk, $filename): array
+    private function generateImage(mixed $media, string $path, string $disk, string $filename): array
     {
-        match (true) {
-            $media instanceof UploadedFile => $media->storeAs($path, $filename, $disk),
-            $media instanceof Image        => $media->save(Storage::disk($disk)->path("$path/$filename")),
-            default                        => throw new \Exception("Unable to recognize file. file type is [" . (get_debug_type($media)) . "]")
-        };
-
-        $path = trim("$path/$filename", '/');
-        return [
-            'name' => $filename,
-            'path' => Storage::disk($disk)->path($path),
-            'size' => Storage::disk($disk)->size($path),
-            'url'  => Storage::disk($disk)->url($path),
-        ];
+        return $this->saveImage($media, $path, $filename, $disk);
     }
 
-    public function generateImageThumb($media, $path, $disk, $filename)
+    /**
+     * @param mixed  $media
+     * @param string $path
+     * @param string $disk
+     * @param string $filename
+     *
+     * @return array{name: string, path: string, size: int, url: string}
+     * @throws Exception
+     */
+    private function generateImageThumb(mixed $media, string $path, string $disk, string $filename): array
     {
-        // ini_set('memory_limit', '1000M');
-
         $filename = "thumb_$filename";
 
-        $media = ImageManager::gd()->read($media);
-        $media = match (true) {
-            $this->thumbnail() instanceof \Closure => $this->thumbnail()($media),
-            default                                => $media->resize(200, 200)
-        };
+        if (!($media instanceof Image) && $this->getThumbnail()) {
+            $media = ImageManager::gd()->read($media);
+            $media = $media->resize(200, 200);
+        }
 
+        return $this->saveImage($media, $path, $filename, $disk);
+    }
+
+    /**
+     * @param mixed  $media
+     * @param string $path
+     * @param string $filename
+     * @param string $disk
+     *
+     * @return array{name: string, path: string, size: int, url: string}
+     * @throws Exception
+     */
+    private function saveImage(mixed $media, string $path, string $filename, string $disk): array
+    {
         match (true) {
             $media instanceof UploadedFile => $media->storeAs($path, $filename, $disk),
             $media instanceof Image        => $media->save(Storage::disk($disk)->path("$path/$filename")),
-            default                        => throw new \Exception("Unable to recognize file. file type is [" . (get_debug_type($media)) . "]")
+            default                        => throw new Exception("Unable to recognize file. file type is [" . (get_debug_type($media)) . "]")
         };
 
         $path = trim("$path/$filename", '/');
@@ -88,10 +99,5 @@ trait ImageTrait
             'size' => Storage::disk($disk)->size($path),
             'url'  => Storage::disk($disk)->url($path),
         ];
-    }
-
-    public function deleteImage($disk, $path, $name = '')
-    {
-        return Storage::disk($disk)->delete("$path$name");
     }
 }

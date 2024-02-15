@@ -22,10 +22,10 @@ enum MediaTypeEnum: int implements ColorsCodeInterface
     {
         return match ($this) {
             self::Image    => ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'svg', 'webp'],
-            self::Audio    => [],
-            self::Video    => [],
-            self::Document => [],
-            self::Archive  => [],
+            self::Audio    => ['mp3', 'aac', 'ogg', 'flac', 'alac', 'wav', 'aiff', 'dsd', 'pcm'],
+            self::Video    => ['mp3', 'mp4', 'mov', 'webm'],
+            self::Document => ['pdf', 'doc', 'docx', 'csv', 'xlx', 'txt', 'pptx', 'divx'],
+            self::Archive  => ['7z', 's7z', 'apk', 'jar', 'rar', 'tar.gz', 'tgz', 'tarZ', 'tar', 'zip', 'zipx'],
         };
     }
 

@@ -15,6 +15,7 @@
         "ext-curl": "*",
         "ext-intl": "*",
         "ext-json": "*",
+        "ext-fileinfo": "*",
         "ext-simplexml": "*",
         "intervention/image": "^3.3"
     },

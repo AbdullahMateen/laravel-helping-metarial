@@ -324,7 +324,7 @@ if (!function_exists('base64_to_uploaded_file')) {
         );
 
         // Optionally, you can delete the temporary file
-        unlink($tempFilePath);
+        // unlink($tempFilePath);
 
         return $uploadedFile;
     }
@@ -346,7 +346,7 @@ if (!function_exists('url_to_uploaded_file')) {
         file_put_contents($tempFilePath, $fileContents);
 
         // Determine file name if not provided
-        $fileName = $fileName ?: basename(parse_url($url, PHP_URL_PATH));
+        $fileName = $fileName ?: str(basename(parse_url($url, PHP_URL_PATH)))->slug('_')->value();
 
         // Create an UploadedFile instance
         $uploadedFile = new UploadedFile(
@@ -356,7 +356,7 @@ if (!function_exists('url_to_uploaded_file')) {
         );
 
         // Optionally, you can delete the temporary file
-        unlink($tempFilePath);
+        // unlink($tempFilePath);
 
         return $uploadedFile;
     }

@@ -3,57 +3,56 @@
 namespace AbdullahMateen\LaravelHelpingMaterial\Traits\Media;
 
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 trait ArchiveTrait
 {
-    public static array $archiveExtensions = ['7z', 's7z', 'apk', 'jar', 'rar', 'tar.gz', 'tgz', 'tarZ', 'tar', 'zip', 'zipx'];
-
-    public static function StoreArchive(mixed $media, string $disk, string $path = '', bool $generateThumb = false, bool $isPublic = true)
+    /**
+     * @return array{media: array, thumb: null, type: false|string, extension: string}
+     */
+    private function storeArchive(): array
     {
-        $mediaData = ['isset' => false];
-        $thumbData = ['isset' => false];
+        $disk     = $this->getDisk();
+        $path     = $this->getPath();
+        $fileInfo = $this->fileInformation();
+        $filename = $fileInfo['name'];
 
-        if (!isset($media)) return [
-            'result'    => false,
-            'media'     => $mediaData,
-            'thumb'     => $thumbData,
-            'type'      => null,
-            'extension' => null,
-        ];
+        if (!Storage::disk($disk)->directoryExists($path)) {
+            File::makeDirectory(storage_path("app/$disk/$path"), 0755, true);
+        }
 
-        $mediaInfo = self::captureFileInformation($media);
-        $filename = self::isUseOriginalName() ? $mediaInfo['full_name'] : $mediaInfo['unique_name'];
-
-        $mediaData = self::GenerateArchive($media, $disk, $path, $filename);
-        if ($generateThumb && in_array($mediaInfo['extension'], self::$archiveExtensions)) {
+        $mediaInfo = $this->generateArchive($this->getFile(), $path, $disk, $filename);
+        if ($this->getThumbnail()) {
             // generate thumb
         }
 
-        return $data = [
-            'result'    => true,
-            'media'     => $mediaData,
-            'thumb'     => $thumbData,
-            'type'      => Storage::disk($disk)->mimeType($filename), // mime_content_type($storagePath . $fileNameToStore),
-            'extension' => strtolower($mediaInfo['extension']),
+        return [
+            'media'     => $mediaInfo,
+            'thumb'     => $thumbInfo ?? null,
+            'type'      => Storage::disk($disk)->mimeType(trim("$path/$filename", '/')), // mime_content_type($storagePath . $fileNameToStore),
+            'extension' => strtolower($fileInfo['_extension']),
         ];
     }
 
-    public static function DeleteArchive($disk, $path, $name = '')
+    /**
+     * @param mixed  $media
+     * @param string $path
+     * @param string $disk
+     * @param string $filename
+     *
+     * @return array{name: string, path: string, size: int, url: string}
+     */
+    private function generateArchive(mixed $media, string $path, string $disk, string $filename): array
     {
-        return Storage::disk($disk)->delete($path . $name);
-    }
+        $media->storeAs($path, $filename, $disk);
 
-    public static function GenerateArchive($media, $disk, $path, $fileNameToStore)
-    {
-        $media->storeAs($path, $fileNameToStore, $disk);
-
-        return $data = [
-            'isset' => true,
-            'name'  => $fileNameToStore,
-            'path'  => Storage::disk($disk)->path($fileNameToStore),
-            'size'  => Storage::disk($disk)->size($fileNameToStore),
-            'url'   => Storage::disk($disk)->url($fileNameToStore),
+        $path = trim("$path/$filename", '/');
+        return [
+            'name'  => $filename,
+            'path'  => Storage::disk($disk)->path($path),
+            'size'  => Storage::disk($disk)->size($path),
+            'url'   => Storage::disk($disk)->url($path),
         ];
     }
 }
