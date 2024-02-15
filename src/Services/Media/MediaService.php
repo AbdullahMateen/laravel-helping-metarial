@@ -11,7 +11,10 @@ use AbdullahMateen\LaravelHelpingMaterial\Traits\Media\ImageTrait;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\Media\VideoTrait;
 use Closure;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HigherOrderTapProxy;
@@ -52,6 +55,8 @@ class MediaService
     private array|null $fileInformation = null;
 
     private array|null $data = null;
+
+    private Model|null $model = null;
 
 
     /*
@@ -302,6 +307,27 @@ class MediaService
         return $this;
     }
 
+    /* ==================== Model ==================== */
+
+    /**
+     * @return Model|null
+     */
+    public function getModel(): ?Model
+    {
+        return $this->model;
+    }
+
+    /**
+     * @param Model $model
+     *
+     * @return $this
+     */
+    public function setModel(Model $model): static
+    {
+        $this->model = $model;
+        return $this;
+    }
+
     /* ==================== intervention ==================== */
 
     /**
@@ -517,6 +543,70 @@ class MediaService
         return $this;
     }
 
+    /**
+     * @param Model|null $model
+     *
+     * @return $this
+     */
+    public function save(Model $model = null): static
+    {
+        $this->when(isset($model), fn () => $this->setModel($model));
+        $model = $this->getModel();
+        if (is_null($model)) {
+            throw new ModelNotFoundException("Unable to save file to database, Model is not provided");
+        }
+
+        $files = [];
+        foreach ($this->getData() as $file) {
+            $files[] = [
+                'group'          => $this->getDisk(),
+                'category'       => $file['media_type'],
+                'mediaable_id'   => $this->getModel()->id,
+                'mediaable_type' => get_morphs_maps($model::class),
+                'media_url'      => $file['media']['url'],
+                'thumb_url'      => $file['thumb']['url'] ?? $file['media']['url'],
+                'media_name'     => $file['media']['name'],
+                'thumb_name'     => $file['thumb']['name'] ?? $file['media']['name'],
+                'path'           => $file['media']['path'],
+                'type'           => $file['type'],
+                'extension'      => $file['extension'],
+                'media_size'     => $file['media']['size'],
+                'thumb_size'     => $file['thumb']['size'] ?? $file['media']['size'],
+                'created_at'     => now_now(),
+                'updated_at'     => now_now(),
+            ];
+        }
+
+        foreach (array_chunk($files, 500) as $filesChunk) {
+            DB::table(get_model_table($model))->insert($filesChunk);
+        }
+
+        return $this;
+    }
+
+    public function update($data, $media, $disk = null, $group = null)
+    {
+        $this->when(isset($model), fn () => $this->setModel($model));
+        $model = $this->getModel();
+        if (is_null($model)) {
+            throw new ModelNotFoundException("Unable to save file to database, Model is not provided");
+        }
+
+        $media->group      = $group ?? $media->group;
+        $media->category   = $data['media_type'] ?? $media->category;
+        $media->media_url  = $data['media']['url'];
+        $media->thumb_url  = $data['thumb']['url'] ?? $data['media']['url'];
+        $media->media_name = $data['media']['name'];
+        $media->thumb_name = $data['thumb']['name'] ?? $data['media']['name'];
+        $media->path       = $data['media']['path'];
+        $media->type       = $data['type'];
+        $media->extension  = $data['extension'];
+        $media->media_size = $data['media']['size'];
+        $media->thumb_size = $data['thumb']['size'] ?? $data['media']['size'];
+        $media->save();
+
+        return $media;
+    }
 
     //    public function temp($data, $model = null, $disk = Media::KEY_DISK_TEMP, $group = Media::KEY_GROUP_TEMP)
     //    {
