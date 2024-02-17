@@ -21,43 +21,68 @@ class LaravelHelpingMaterialServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
 
             $this->publishes([
-                __DIR__ . '/Enums/' => app_path('Enums'),
+                __DIR__ . '../stubs/Enums/Media/MediaDiskEnum.stub'    => base_path('app/Enums/Media/MediaDiskEnum.php'),
+                __DIR__ . '../stubs/Enums/Media/MediaTypeEnum.stub'    => base_path('app/Enums/Media/MediaTypeEnum.php'),
+                __DIR__ . '../stubs/Enums/User/AccountStatusEnum.stub' => base_path('app/Enums/User/AccountStatusEnum.php'),
+                __DIR__ . '../stubs/Enums/User/GenderEnum.stub'        => base_path('app/Enums/User/GenderEnum.php'),
+                __DIR__ . '../stubs/Enums/User/RoleEnum.stub'          => base_path('app/Enums/User/RoleEnum.php'),
+                __DIR__ . '../stubs/Enums/StatusEnum.stub'             => base_path('app/Enums/StatusEnum.php'),
             ], 'lhm-enums');
 
             $this->publishes([
-                __DIR__ . '/Helpers/' => app_path('Helpers'),
+                __DIR__ . '../stubs/Helpers/application.stub' => base_path('app/Helpers/application.php'),
+                __DIR__ . '../stubs/Helpers/files.stub'       => base_path('app/Helpers/files.php'),
+                __DIR__ . '../stubs/Helpers/general.stub'     => base_path('app/Helpers/general.php'),
+                __DIR__ . '../stubs/Helpers/helpers.stub'     => base_path('app/Helpers/helpers.php'),
+                __DIR__ . '../stubs/Helpers/packages.stub'    => base_path('app/Helpers/packages.php'),
+                __DIR__ . '../stubs/Helpers/user.stub'        => base_path('app/Helpers/user.php'),
             ], 'lhm-helpers');
 
             $this->publishes([
-                __DIR__ . '/Interfaces/' => app_path('Interfaces'),
+                __DIR__ . '../stubs/Interfaces/ColorsCodeInterface.stub' => base_path('app/Interfaces/ColorsCodeInterface.php'),
             ], 'lhm-interfaces');
 
             $this->publishes([
-                __DIR__ . '/Middleware/Custom/' => app_path('/Middleware/Custom'),
+                __DIR__ . '../stubs/Middleware/Custom/AuthorizationMiddleware.stub' => base_path('app/Http/Middleware/Custom/AuthorizationMiddleware.php'),
             ], 'lhm-middleware');
 
             $this->publishes([
-                __DIR__ . '/migrations/' => app_path('/database/migrations'),
+                __DIR__ . '/migrations/2024_02_17_053998_create_media_table.php' => base_path('database/migrations/2024_02_17_053998_create_media_table.php'),
             ], 'lhm-migrations');
 
             $this->publishes([
-                __DIR__ . '/Models/' => app_path('/Models'),
+                __DIR__ . '../stubs/Models/ExtendedModel.stub' => base_path('app/Models/ExtendedModel.php'),
+                __DIR__ . '../stubs/Models/Media.stub'         => base_path('app/Models/Media.php'),
             ], 'lhm-models');
 
             $this->publishes([
-                __DIR__ . '/resources/sass/' => app_path('/resources/sass'),
+                __DIR__ . '/resources/sass/' => base_path('resources/sass'),
             ], 'lhm-sass');
 
             $this->publishes([
-                __DIR__ . '/Rules/' => app_path('/Rules'),
+                __DIR__ . '../stubs/Rules/Throttle.stub' => base_path('app/Rules/Throttle.php'),
             ], 'lhm-rules');
 
             $this->publishes([
-                __DIR__ . '/Services/' => app_path('/Services'),
+                __DIR__ . '../stubs/Services/Media/MediaService.stub' => base_path('app/Services/Media/MediaService.php'),
             ], 'lhm-services');
 
             $this->publishes([
-                __DIR__ . '/Traits/' => app_path('/Traits'),
+                __DIR__ . '../stubs/Traits/Api/ApiExceptionHandlerTrait.stub'         => base_path('app/Traits/Api/ApiExceptionHandlerTrait.php'),
+                __DIR__ . '../stubs/Traits/Api/ApiResponseTrait.stub'                 => base_path('app/Traits/Api/ApiResponseTrait.php'),
+                __DIR__ . '../stubs/Traits/General/Enum/GeneralTrait.stub'            => base_path('app/Traits/General/Enum/GeneralTrait.php'),
+                __DIR__ . '../stubs/Traits/General/Model/AuthorizationTrait.stub'     => base_path('app/Traits/General/Model/AuthorizationTrait.php'),
+                __DIR__ . '../stubs/Traits/General/Model/Encryptable.stub'            => base_path('app/Traits/General/Model/Encryptable.php'),
+                __DIR__ . '../stubs/Traits/General/Model/ModelFetchTrait.stub'        => base_path('app/Traits/General/Model/ModelFetchTrait.php'),
+                __DIR__ . '../stubs/Traits/General/Model/ScopeTrait.stub'             => base_path('app/Traits/General/Model/ScopeTrait.php'),
+                __DIR__ . '../stubs/Traits/General/Model/UserNotificationsTrait.stub' => base_path('app/Traits/General/Model/UserNotificationsTrait.php'),
+                __DIR__ . '../stubs/Traits/General/Model/ValidationRulesTrait.stub'   => base_path('app/Traits/General/Model/ValidationRulesTrait.php'),
+                __DIR__ . '../stubs/Traits/General/Model/ValidationTrait.stub'        => base_path('app/Traits/General/Model/ValidationTrait.php'),
+                __DIR__ . '../stubs/Traits/Media/ArchiveTrait.stub'                   => base_path('app/Traits/Media/ArchiveTrait.php'),
+                __DIR__ . '../stubs/Traits/Media/AudioTrait.stub'                     => base_path('app/Traits/Media/AudioTrait.php'),
+                __DIR__ . '../stubs/Traits/Media/DocumentTrait.stub'                  => base_path('app/Traits/Media/DocumentTrait.php'),
+                __DIR__ . '../stubs/Traits/Media/ImageTrait.stub'                     => base_path('app/Traits/Media/ImageTrait.php'),
+                __DIR__ . '../stubs/Traits/Media/VideoTrait.stub'                     => base_path('app/Traits/Media/VideoTrait.php'),
             ], 'lhm-traits');
 
         }
@@ -72,11 +97,11 @@ class LaravelHelpingMaterialServiceProvider extends ServiceProvider
     {
         $this->app['router']->aliasMiddleware('authorize', AuthorizationMiddleware::class);
 
-         Model::preventLazyLoading(!$this->app->isProduction());
+        Model::preventLazyLoading(!$this->app->isProduction());
 
-         if (function_exists('get_morphs_maps')) {
-             Relation::enforceMorphMap(get_morphs_maps());
-         }
+        if (function_exists('get_morphs_maps')) {
+            Relation::enforceMorphMap(get_morphs_maps());
+        }
 
         $this->bootDirectories();
         $this->bootDirectives();

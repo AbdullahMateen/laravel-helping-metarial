@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Traits\General\Model;
+
+trait ValidationRulesTrait
+{
+    public function ruleUnique($column, $id = null)
+    {
+        $id = $id ?? $this->id;
+        $unique = sprintf('unique:%s,%s', get_model_table($this), $column);
+        return is_null($id) ? $unique : "$unique,$id";
+    }
+}

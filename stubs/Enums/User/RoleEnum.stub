@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Enums\User;
+
+use App\Interfaces\ColorsCodeInterface;
+use App\Traits\General\Enum\GeneralTrait;
+use JetBrains\PhpStorm\Pure;
+
+enum RoleEnum: int implements ColorsCodeInterface
+{
+    use GeneralTrait;
+
+    case Developer = 0000;
+    case SuperAdmin = 1001;
+    case Admin = 3001;
+    case Manager = 5001;
+    case Operator = 7001;
+    case Customer = 9001;
+
+    public const ROLE_DEVELOPER   = 'Developer';
+    public const ROLE_SUPER_ADMIN = 'Super Admin';
+    public const ROLE_ADMIN       = 'Admin';
+    public const ROLE_MANAGER     = 'Manager';
+    public const ROLE_OPERATOR    = 'Operator';
+    public const ROLE_CUSTOMER    = 'Customer';
+
+    /**
+     * @return RoleEnum[]
+     */
+    public static function admins(): array
+    {
+        return [
+            self::Developer,
+            self::SuperAdmin,
+            self::Admin,
+        ];
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return RoleEnum
+     */
+    public static function fromName(string $name): RoleEnum
+    {
+        return match ($name) {
+            'Developer'  => self::Developer,
+            'SuperAdmin' => self::SuperAdmin,
+            'Admin'      => self::Admin,
+            'Manager'    => self::Manager,
+            'Operator'   => self::Operator,
+            'Customer'   => self::Customer,
+        };
+    }
+
+    /**
+     * @param string $role
+     *
+     * @return RoleEnum
+     */
+    public static function fromRole(string $role): RoleEnum
+    {
+        return match ($role) {
+            self::ROLE_DEVELOPER   => self::Developer,
+            self::ROLE_SUPER_ADMIN => self::SuperAdmin,
+            self::ROLE_ADMIN       => self::Admin,
+            self::ROLE_MANAGER     => self::Manager,
+            self::ROLE_OPERATOR    => self::Operator,
+            self::ROLE_CUSTOMER    => self::Customer,
+        };
+    }
+
+    /**
+     * @return string
+     */
+    #[Pure]
+    public function role(): string
+    {
+        return $this->toString();
+    }
+
+    /**
+     * @return string
+     */
+    public function toString(): string
+    {
+        return match ($this) {
+            self::Developer  => self::ROLE_DEVELOPER,
+            self::SuperAdmin => self::ROLE_SUPER_ADMIN,
+            self::Admin      => self::ROLE_ADMIN,
+            self::Manager    => self::ROLE_MANAGER,
+            self::Operator   => self::ROLE_OPERATOR,
+            self::Customer   => self::ROLE_CUSTOMER,
+        };
+    }
+
+    /**
+     * @return string
+     */
+    public function color(): string
+    {
+        return match ($this) {
+            self::Developer  => self::FIREBRICK1_CLASS,
+            self::SuperAdmin => self::DANGER_CLASS,
+            self::Admin      => self::WARNING_CLASS,
+            self::Manager    => self::YELLOW_CLASS,
+            self::Operator   => self::INFO_CLASS,
+            self::Customer   => self::PRIMARY_CLASS,
+        };
+    }
+
+}

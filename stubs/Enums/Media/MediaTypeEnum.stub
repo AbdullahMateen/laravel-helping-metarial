@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Enums\Media;
+
+use App\Interfaces\ColorsCodeInterface;
+use App\Traits\General\Enum\GeneralTrait;
+
+enum MediaTypeEnum: int implements ColorsCodeInterface
+{
+    use GeneralTrait;
+
+    case Image = 1;
+    case Audio = 2;
+    case Video = 3;
+    case Document = 4;
+    case Archive = 5;
+
+    /**
+     * @return array|string[]
+     */
+    public function extensions(): array
+    {
+        return match ($this) {
+            self::Image    => ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'svg', 'webp'],
+            self::Audio    => ['mp3', 'aac', 'ogg', 'flac', 'alac', 'wav', 'aiff', 'dsd', 'pcm'],
+            self::Video    => ['mp3', 'mp4', 'mov', 'webm'],
+            self::Document => ['pdf', 'doc', 'docx', 'csv', 'xlx', 'txt', 'pptx', 'divx'],
+            self::Archive  => ['7z', 's7z', 'apk', 'jar', 'rar', 'tar.gz', 'tgz', 'tarZ', 'tar', 'zip', 'zipx'],
+        };
+    }
+
+    /**
+     * @return string
+     */
+    public function toString(): string
+    {
+        return $this->name;
+        // return match ($this) {
+        //     self::Image    => 'Image',
+        //     self::Video    => 'Video',
+        //     self::Document => 'Document',
+        //     self::Archive  => 'Archive',
+        // };
+    }
+
+}
