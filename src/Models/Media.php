@@ -2,6 +2,8 @@
 
 namespace AbdullahMateen\LaravelHelpingMaterial\Models;
 
+use AbdullahMateen\LaravelHelpingMaterial\Enums\Media\MediaDiskEnum;
+use AbdullahMateen\LaravelHelpingMaterial\Enums\Media\MediaTypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Media extends ExtendedModel
@@ -14,6 +16,10 @@ class Media extends ExtendedModel
     |--------------------------------------------------------------------------
     */
 
+    protected $casts = [
+        'group' => MediaDiskEnum::class,
+        'category' => MediaTypeEnum::class
+    ];
 
     /*
     |--------------------------------------------------------------------------
@@ -24,7 +30,7 @@ class Media extends ExtendedModel
     public static function boot()
     {
         static::creating(function ($self) {
-            // unset($self->status);
+             unset($self->status);
         });
 
         parent::boot();
