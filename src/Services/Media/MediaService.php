@@ -4,6 +4,7 @@ namespace AbdullahMateen\LaravelHelpingMaterial\Services\Media;
 
 use AbdullahMateen\LaravelHelpingMaterial\Enums\Media\MediaDiskEnum;
 use AbdullahMateen\LaravelHelpingMaterial\Enums\Media\MediaTypeEnum;
+use AbdullahMateen\LaravelHelpingMaterial\Models\Media;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\Media\ArchiveTrait;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\Media\AudioTrait;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\Media\DocumentTrait;
@@ -14,6 +15,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -54,7 +56,8 @@ class MediaService
 
     private array|null $fileInformation = null;
 
-    private array|null $data = null;
+    private array $data = [];
+    private array $ids = [];
 
     private Model|null $model = null;
 
@@ -114,7 +117,7 @@ class MediaService
      */
     public function getDisk(): MediaDiskEnum|string
     {
-        return $this->disk instanceof MediaDiskEnum ? $this->disk->disk() : $this->disk;
+        return $this->disk;
     }
 
     /**
@@ -122,9 +125,12 @@ class MediaService
      *
      * @return $this
      */
-    public function setDisk(MediaDiskEnum|string $disk): static
+    public function setDisk(MediaDiskEnum|string $disk = 'public'): static
     {
-        $this->disk = $disk;
+        $this->disk = $this->disk instanceof MediaDiskEnum ? $this->disk->disk() : $this->disk;
+        if(empty($this->disk)) {
+            $this->disk = 'public';
+        }
         return $this;
     }
 
@@ -288,22 +294,22 @@ class MediaService
     /* ==================== data ==================== */
 
     /**
-     * @return array
+     * @return Collection
      */
-    public function getData(): array
+    public function getData(): Collection
     {
-        return $this->data;
+        return collect($this->data);
     }
 
     /**
-     * @param array|null $data
-     * @param bool       $fresh
+     * @param array $data
+     * @param bool  $fresh
      *
-     * @return MediaService
+     * @return $this
      */
-    private function setData(?array $data, bool $fresh = false): MediaService
+    private function setData(array $data, bool $fresh = false): static
     {
-        $this->data = $fresh ? $data : [...($this->data ?? []), $data];
+        $this->data = $fresh ? $data : collect([...($this->data ?? []), $data])->unique('media.name')->toArray();
         return $this;
     }
 
@@ -486,6 +492,12 @@ class MediaService
         return tap($this, $callback($this));
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Put/Remove files to/from Storage
+    |--------------------------------------------------------------------------
+    */
+
     /* ==================== store to filesystem ==================== */
 
     /**
@@ -521,13 +533,32 @@ class MediaService
     }
 
     /**
+     * @param array                     $files
+     * @param string|null               $path
+     * @param string|null               $filename
+     * @param MediaDiskEnum|string|null $disk
+     *
+     * @return $this
+     * @throws Exception
+     */
+    public function filesStoreAs(array $files, ?string $path = null, ?string $filename = null, MediaDiskEnum|string|null $disk = null): static
+    {
+        foreach (array_filter($files) as $file) {
+            $this->setFile($file)->storeAs($path, $filename, $disk);
+        }
+        return $this;
+    }
+
+    /* ==================== remove from filesystem ==================== */
+
+    /**
      * @param string|null               $path
      * @param string|null               $filename
      * @param MediaDiskEnum|string|null $disk
      *
      * @return $this
      */
-    public function destroy(?string $path = null, ?string $filename = null, MediaDiskEnum|string|null $disk = null): static
+    public function remove(?string $path = null, ?string $filename = null, MediaDiskEnum|string|null $disk = null): static
     {
         $this
             ->when(isset($disk), fn () => $this->setDisk($disk))
@@ -539,12 +570,67 @@ class MediaService
         $name      = $this->getName() instanceof Closure ? ($this->getName())($name, $extension) : $this->getName();
 
         Storage::disk($this->getDisk())->delete(trim("{$this->getPath()}/$name", '/'));
+        Storage::disk($this->getDisk())->delete(trim("{$this->getPath()}/thumb_$name", '/'));
 
         return $this;
     }
 
     /**
-     * @param Model|null $model
+     * @param array $files {disk: file path with name} e.g. ['public' => 'path/to/file/example.png']
+     *
+     * @return $this
+     */
+    public function removeFiles(array $files): static
+    {
+        foreach (array_filter($files) as $disk => $file) {
+            $path     = pathinfo($file, PATHINFO_DIRNAME);
+            $filename = pathinfo($file, PATHINFO_BASENAME);
+            $this->remove($path, $filename, $disk);
+        }
+        return $this;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Add/Remove data to/from Database
+    |--------------------------------------------------------------------------
+    */
+
+    /* ==================== ids ==================== */
+
+    /**
+     * @return array
+     */
+    public function getIds(): array
+    {
+        return array_filter($this->ids);
+    }
+
+    /**
+     * @param mixed $id
+     * @param bool  $fresh
+     *
+     * @return $this
+     */
+    private function setIds(mixed $id, bool $fresh = false): static
+    {
+        if ($fresh) {
+            $this->ids = [];
+        }
+
+        if (is_array($id)) {
+            $this->ids = [...$this->ids, ...array_filter($id)];
+        } else {
+            $this->ids[] = $id;
+        }
+
+        return $this;
+    }
+
+    /* ==================== store to database ==================== */
+
+    /**
+     * @param Model|null $model Give the model that you are saving these image(s) for
      *
      * @return $this
      */
@@ -581,124 +667,155 @@ class MediaService
             DB::table(get_model_table($model))->insert($filesChunk);
         }
 
+        $this->setIds(
+            Media::toBase()->whereIn('media_name', $this->getData()->pluck('media.name')->all())->pluck('id')->all(),
+            true,
+        );
+
         return $this;
     }
 
-    public function update($data, $media, $disk = null, $group = null)
+    /**
+     * @param Media|array|string        $media
+     * @param MediaDiskEnum|string|null $disk
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function update(Media|array|string $media, MediaDiskEnum|string $disk = null): mixed
     {
-        $this->when(isset($model), fn () => $this->setModel($model));
-        $model = $this->getModel();
-        if (is_null($model)) {
-            throw new ModelNotFoundException("Unable to save file to database, Model is not provided");
+        $this->when(isset($disk), fn () => $this->setDisk($disk));
+
+        $isMediaInstance = $media instanceof Media;
+        if (!$isMediaInstance) {
+            $medias = Media::toBase()->whereIn('id', is_array($media) ? $media : explode(',', $media))->get();
+
+            if (collect($medias)->count() !== 1 && collect($medias)->count() !== $this->getData()->count()) {
+                throw new RuntimeException('Either pass single instance of media or id, or pass the same number of ids as the files');
+            }
+
+            if (collect($medias)->count() === 1) {
+                $media           = last($medias);
+                $isMediaInstance = true;
+            }
         }
 
-        $media->group      = $group ?? $media->group;
-        $media->category   = $data['media_type'] ?? $media->category;
-        $media->media_url  = $data['media']['url'];
-        $media->thumb_url  = $data['thumb']['url'] ?? $data['media']['url'];
-        $media->media_name = $data['media']['name'];
-        $media->thumb_name = $data['thumb']['name'] ?? $data['media']['name'];
-        $media->path       = $data['media']['path'];
-        $media->type       = $data['type'];
-        $media->extension  = $data['extension'];
-        $media->media_size = $data['media']['size'];
-        $media->thumb_size = $data['thumb']['size'] ?? $data['media']['size'];
-        $media->save();
+        foreach ($this->getData() as $index => $file) {
+            if (!$isMediaInstance) {
+                $media = $medias[$index];
+            }
+
+            $media->group      = $this->getDisk() ?? $media->group;
+            $media->category   = $file['media_type'] ?? $media->category;
+            $media->media_url  = $file['media']['url'];
+            $media->thumb_url  = $file['thumb']['url'] ?? $file['media']['url'];
+            $media->media_name = $file['media']['name'];
+            $media->thumb_name = $file['thumb']['name'] ?? $file['media']['name'];
+            $media->path       = $file['media']['path'];
+            $media->type       = $file['type'];
+            $media->extension  = $file['extension'];
+            $media->media_size = $file['media']['size'];
+            $media->thumb_size = $file['thumb']['size'] ?? $file['media']['size'];
+            $media->save();
+        }
+
+        $this->setIds(
+            Media::toBase()->whereIn('media_name', $this->getData()->pluck('media.name')->all())->pluck('id')->all(),
+            true,
+        );
 
         return $media;
     }
 
-    //    public function temp($data, $model = null, $disk = Media::KEY_DISK_TEMP, $group = Media::KEY_GROUP_TEMP)
-    //    {
-    //        $media                 = new Media();
-    //        $media->group          = $group;
-    //        $media->category       = $data['media_type'] ?? null;
-    //        $media->mediaable_id   = $model->id ?? null;
-    //        $media->mediaable_type = isset($model) ? get_morphs_maps(get_class($model)) : null;
-    //        $media->media_url      = $data['media']['url'];
-    //        $media->thumb_url      = $data['thumb']['url'] ?? null;
-    //        $media->media_name     = $data['media']['name'];
-    //        $media->thumb_name     = $data['thumb']['name'] ?? null;
-    //        $media->path           = $data['media']['path'];
-    //        $media->type           = $data['type'];
-    //        $media->extension      = $data['extension'];
-    //        $media->media_size     = $data['media']['size'];
-    //        $media->thumb_size     = $data['thumb']['size'] ?? null;
-    //        $media->save();
-    //
-    //        return $media;
-    //    }
-    //
-    //    public function move($modal, $disk, $value, $path = '', $column = 'media_name')
-    //    {
-    //        $media = Media::where($column, '=', $value)->first();
-    //
-    //        $path = trim(trim($path, '/'), '\\');
-    //        $from = Media::KEY_DISK_TEMP . "/$media->media_name";
-    //        $to   = $disk . "/$path/$media->media_name";
-    //
-    //        if (!Storage::disk($disk)->directoryExists($path)) {
-    //            File::makeDirectory(storage_path("app/$disk/$path"), 0755, true);
-    //        }
-    //
-    //        if (!Storage::move($from, $to)) return $modal;
-    //
-    //        if (isset($media->thumb_name)) {
-    //            $from = Media::KEY_DISK_TEMP . "/$media->thumb_name";
-    //            $to   = $disk . "/$path/$media->thumb_name";
-    //            Storage::move($from, $to);
-    //        }
-    //
-    //        $media->group          = $disk;
-    //        $media->mediaable_id   = $modal->id;
-    //        $media->mediaable_type = get_morphs_maps(get_class($modal));
-    //
-    //        $media->media_url = Storage::disk($disk)->url("$path/$media->media_name");
-    //        $media->thumb_url = Storage::disk($disk)->url("$path/$media->thumb_name");
-    //        $media->path      = Storage::disk($disk)->path("$path/$media->media_name");
-    //        $media->save();
-    //
-    //        return $media;
-    //    }
-    //
-    //    public function save($data, $model, $disk = null, $group = null)
-    //    {
-    //        $media                 = new Media();
-    //        $media->group          = $group;
-    //        $media->category       = $data['media_type'] ?? null;
-    //        $media->mediaable_id   = $model->id;
-    //        $media->mediaable_type = get_morphs_maps(get_class($model));
-    //        $media->media_url      = $data['media']['url'];
-    //        $media->thumb_url      = $data['thumb']['url'] ?? $data['media']['url'];
-    //        $media->media_name     = $data['media']['name'];
-    //        $media->thumb_name     = $data['thumb']['name'] ?? $data['media']['name'];
-    //        $media->path           = $data['media']['path'];
-    //        $media->type           = $data['type'];
-    //        $media->extension      = $data['extension'];
-    //        $media->media_size     = $data['media']['size'];
-    //        $media->thumb_size     = $data['thumb']['size'] ?? $data['media']['size'];
-    //        $media->save();
-    //
-    //        return $media;
-    //    }
-    //
-    //    public function update($data, $media, $disk = null, $group = null)
-    //    {
-    //        $media->group      = $group ?? $media->group;
-    //        $media->category   = $data['media_type'] ?? $media->category;
-    //        $media->media_url  = $data['media']['url'];
-    //        $media->thumb_url  = $data['thumb']['url'] ?? $data['media']['url'];
-    //        $media->media_name = $data['media']['name'];
-    //        $media->thumb_name = $data['thumb']['name'] ?? $data['media']['name'];
-    //        $media->path       = $data['media']['path'];
-    //        $media->type       = $data['type'];
-    //        $media->extension  = $data['extension'];
-    //        $media->media_size = $data['media']['size'];
-    //        $media->thumb_size = $data['thumb']['size'] ?? $data['media']['size'];
-    //        $media->save();
-    //
-    //        return $media;
-    //    }
+    /**
+     * @param array|string         $values
+     * @param MediaDiskEnum|string $fromDisk
+     * @param string               $fromPath
+     * @param MediaDiskEnum|string $toDisk
+     * @param string               $toPath
+     * @param string               $column
+     *
+     * @return $this
+     */
+    public function move(array|string $values, MediaDiskEnum|string $fromDisk = 'public', string $fromPath = '', MediaDiskEnum|string $toDisk = 'public', string $toPath = '', string $column = 'media_name'): static
+    {
+        $model = $this->getModel();
+        if (is_null($model)) {
+            throw new ModelNotFoundException("Unable to move file, Model is not provided");
+        }
 
+        $values = is_array($values) ? $values : explode(',', $values);
+        $medias = Media::whereIn($column, $values)->get();
+
+        $this->setIds([], true);
+        foreach ($medias as $media) {
+            $filename = $media->media_name;
+            $fromPath = trim(sprintf("%s/%s", $this->setDisk($fromDisk)->getDisk(), $this->setPath($fromPath)->getPath()), '/\\');
+            $toPath   = trim(sprintf("%s/%s", $this->setDisk($toDisk)->getDisk(), $this->setPath($toPath)->getPath()), '/\\');
+
+            if (!Storage::directoryExists($toPath)) {
+                File::makeDirectory(storage_path("app/$toPath"), 0755, true);
+            }
+
+            if (!Storage::move("$fromPath/$filename", "$toPath/$filename")) {
+                continue;
+            }
+
+            if (isset($media->thumb_name)) {
+                Storage::move("$fromPath/thumb_$filename", "$toPath/thumb_$filename");
+            }
+
+            $disk = $this->getDisk();
+            $path = $this->getPath();
+
+            $media->group          = $disk;
+            $media->mediaable_id   = $this->getModel()->id;
+            $media->mediaable_type = get_morphs_maps($this->getModel()::class);
+
+            $media->media_url = Storage::disk($disk)->url("$path/$filename");
+            $media->thumb_url = Storage::disk($disk)->url("$path/thumb_$filename");
+            $media->path      = Storage::disk($disk)->path("$path/$filename");
+            $media->save();
+
+            $this->setIds($media->id);
+        }
+
+        return $this;
+    }
+
+    /* ==================== remove from database ==================== */
+
+    /**
+     * @param array|string $values
+     * @param string       $column
+     * @param bool         $removeFromStorage
+     *
+     * @return $this
+     */
+    public function destroy(array|string $values, string $column = 'id', bool $removeFromStorage = false): static
+    {
+        $values = is_array($values) ? $values : explode(',', $values);
+        $query = Media::whereIn($column, $values);
+
+        $medias = collect($query->select('id', 'group', 'media_name', 'path')->all());
+
+        $query->delete();
+
+        $this->setIds(
+            $medias->pluck('id')->all(),
+            true
+        );
+
+        if ($removeFromStorage) {
+            $this->removeFiles(
+                $medias->map(function ($media) {
+                    $media->full_path = "$media->path/$media->media_name";
+                    return $media;
+                })->pluck('full_path', 'group')->all()
+            );
+        }
+
+        return $this;
+    }
 
 }
