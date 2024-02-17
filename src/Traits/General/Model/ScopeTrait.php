@@ -41,6 +41,6 @@ trait ScopeTrait
 
     public function scopeInActive($query)
     {
-        return $query->where(get_model_table(get_called_class()).'.status', '=', StatusEnum::InActive);
+        return $query->where(get_model_table(get_called_class()).'.status', '=', StatusEnum::Inactive);
     }
 }

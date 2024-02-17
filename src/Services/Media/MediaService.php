@@ -22,7 +22,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HigherOrderTapProxy;
 use Illuminate\Support\Traits\Tappable;
 use Intervention\Image\Image;
-use Intervention\Image\ImageManager;
 use RuntimeException;
 
 class MediaService

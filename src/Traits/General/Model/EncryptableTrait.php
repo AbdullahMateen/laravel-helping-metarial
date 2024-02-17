@@ -7,7 +7,7 @@ use Illuminate\Contracts\Encryption\EncryptException;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
-trait Encryptable
+trait EncryptableTrait
 {
     /*
         Todo: things that need to be done

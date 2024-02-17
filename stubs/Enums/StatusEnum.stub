@@ -2,15 +2,15 @@
 
 namespace App\Enums;
 
-use App\Interfaces\ColorsCodeInterface;
+use App\Interfaces\ColorsInterface;
 use App\Traits\General\Enum\GeneralTrait;
 
-enum StatusEnum: int implements ColorsCodeInterface
+enum StatusEnum: int implements ColorsInterface
 {
     use GeneralTrait;
 
     case Active = 1;
-    case InActive = 0;
+    case Inactive = 0;
 
     /**
      * @return string
@@ -19,7 +19,7 @@ enum StatusEnum: int implements ColorsCodeInterface
     {
         return match ($this) {
             self::Active   => 'Active',
-            self::InActive => 'In-Active',
+            self::Inactive => 'Inactive',
         };
     }
 
@@ -30,7 +30,7 @@ enum StatusEnum: int implements ColorsCodeInterface
     {
         return match ($this) {
             self::Active   => self::SUCCESS_CLASS,
-            self::InActive => self::DANGER_CLASS,
+            self::Inactive => self::DANGER_CLASS,
         };
     }
 

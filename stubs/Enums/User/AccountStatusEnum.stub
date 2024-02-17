@@ -2,10 +2,10 @@
 
 namespace App\Enums\User;
 
-use App\Interfaces\ColorsCodeInterface;
+use App\Interfaces\ColorsInterface;
 use App\Traits\General\Enum\GeneralTrait;
 
-enum AccountStatusEnum: int implements ColorsCodeInterface
+enum AccountStatusEnum: int implements ColorsInterface
 {
     use GeneralTrait;
 
@@ -28,6 +28,8 @@ enum AccountStatusEnum: int implements ColorsCodeInterface
     }
 
     /**
+     * Options to show in dropdown. User can be switched to these statuses
+     *
      * @return AccountStatusEnum[]
      */
     public static function editable(): array
@@ -46,14 +48,6 @@ enum AccountStatusEnum: int implements ColorsCodeInterface
     public function toString(): string
     {
         return $this->name;
-        // return match ($this) {
-        //     self::Pending    => 'Pending',
-        //     self::Unverified => 'Unverified',
-        //     self::Active     => 'Active',
-        //     self::Inactive   => 'Inactive',
-        //     self::Suspend    => 'Suspend',
-        //     self::Blocked    => 'Blocked',
-        // };
     }
 
     /**

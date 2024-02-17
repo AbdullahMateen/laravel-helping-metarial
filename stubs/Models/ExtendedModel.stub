@@ -3,22 +3,23 @@
 namespace App\Models;
 
 use App\Enums\StatusEnum;
-use App\Interfaces\ColorsCodeInterface;
+use App\Interfaces\ColorsInterface;
 use App\Traits\General\Model\AuthorizationTrait;
 use App\Traits\General\Model\ModelFetchTrait;
-use App\Traits\General\Model\ValidationRulesTrait;
+use App\Traits\General\Model\ScopeTrait;
 use App\Traits\General\Model\ValidationTrait;
 use Illuminate\Database\Eloquent\Model;
+use AbdullahMateen\LaravelHelpingMaterial\Models\ExtendedModel as BaseModel
 
 /**
  * @method static columns()
  * @method static auth()
+ * @method static whereDateBetween()
  * @method static active()
  * @method static inactive()
  */
-class ExtendedModel extends Model implements ColorsCodeInterface
+class ExtendedModel extends BaseModel
 {
-    use AuthorizationTrait, ModelFetchTrait, ValidationRulesTrait, ValidationTrait;
 
     /*
     |--------------------------------------------------------------------------
@@ -26,11 +27,6 @@ class ExtendedModel extends Model implements ColorsCodeInterface
     |--------------------------------------------------------------------------
     */
 
-    protected $guarded = [];
-
-    protected $casts = [
-        'status' => 'integer',
-    ];
 
     /*
     |--------------------------------------------------------------------------
@@ -38,18 +34,6 @@ class ExtendedModel extends Model implements ColorsCodeInterface
     |--------------------------------------------------------------------------
     */
 
-    public function __construct(array $attributes = [])
-    {
-        $this->setRawAttributes(array_merge($this->attributes, [
-            'status' => StatusEnum::Active->value,
-        ]), true);
-        parent::__construct($attributes);
-    }
-
-    public function getRouteKeyName()
-    {
-        return 'slug';
-    }
 
     /*
     |--------------------------------------------------------------------------
@@ -57,15 +41,6 @@ class ExtendedModel extends Model implements ColorsCodeInterface
     |--------------------------------------------------------------------------
     */
 
-    /* ================= Pages ======================== */
-    public const KEY_PAGE_TYPE  = 'pageType';
-    public const KEY_PAGE_INDEX = 'index';
-    public const KEY_PAGE_TRASH = 'trash';
-
-    /* ================= Forms ======================== */
-    public const KEY_FORM_TYPE        = 'formType';
-    public const KEY_FORM_TYPE_CREATE = 'create';
-    public const KEY_FORM_TYPE_EDIT   = 'edit';
 
     /*
     |--------------------------------------------------------------------------
@@ -73,29 +48,6 @@ class ExtendedModel extends Model implements ColorsCodeInterface
     |--------------------------------------------------------------------------
     */
 
-    public function scopeColumns($query, $columns = [], $overwrite = false)
-    {
-        $default = ['id', 'name'];
-        $columns = is_array($columns) ? $columns : explode(',', $columns);
-        $columns = $overwrite ? $columns : array_merge($default, $columns);
-        return $query->select($columns);
-    }
-
-    public function scopeAuth($query, $columnName = 'user_id')
-    {
-        if (!auth_check()) return $query;
-        return $query->where($columnName, '=', auth_id());
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where(get_model_table(get_called_class()) . '.status', '=', StatusEnum::Active->value);
-    }
-
-    public function scopeInactive($query)
-    {
-        return $query->where(get_model_table(get_called_class()) . '.status', '=', StatusEnum::InActive->value);
-    }
 
     /*
     |--------------------------------------------------------------------------
@@ -131,53 +83,6 @@ class ExtendedModel extends Model implements ColorsCodeInterface
     |--------------------------------------------------------------------------
     */
 
-    public function readable()
-    {
-        $this->statusName  = method_exists($this, 'statusName') ? $this->statusName() : '';
-        $this->statusColor = method_exists($this, 'statusColor') ? $this->statusColor() : '';
-
-        return $this;
-    }
-
-    public function deletable()
-    {
-        return true;
-    }
-
-    public function deleteInstance()
-    {
-        $this->delete();
-    }
-
-    public function restorable()
-    {
-        return true;
-    }
-
-    public function restoreInstance()
-    {
-        return $this->restore();
-    }
-
-    public function forceDeletable()
-    {
-        return true;
-    }
-
-    public function forceDeleteInstance()
-    {
-        return $this->forceDelete();
-    }
-
-    public function statusName()
-    {
-        return !($this->status instanceof StatusEnum) ? StatusEnum::tryFrom($this->status)?->toString() : $this->status->toString();
-    }
-
-    public function statusColor()
-    {
-        return !($this->status instanceof StatusEnum) ? StatusEnum::tryFrom($this->status)?->color() : $this->status->color();
-    }
 
     /*
     |--------------------------------------------------------------------------

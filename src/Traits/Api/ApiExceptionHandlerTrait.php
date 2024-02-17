@@ -12,8 +12,6 @@ use Throwable;
 
 trait ApiExceptionHandlerTrait
 {
-    use ApiResponseTrait;
-
     private $status_code = null;
     private $message = '';
     private $errors = [];
@@ -85,27 +83,14 @@ trait ApiExceptionHandlerTrait
                 break;
         }
 
-//        if (config('app.debug')) {
-//            $response['trace'] = $exception->getTrace();
-//            $response['code'] = $exception->getCode();
-//        }
-
         $response['status'] = $this->status_code ?? $statusCode;
         $response['message'] = $response['status'] == 500 ? $response['message'] : $this->message;
 
-        $this->status_code = $response['status']; // $this->status_code ?? $statusCode;
-        $this->message = $response['message']; // isset($this->message) && $this->message !== '' ? $this->message : $response['message'] ?? '';
+        $this->status_code = $response['status'];
+        $this->message = $response['message'];
         $this->errors = (isset($this->errors) && !empty($this->errors)) ? $this->errors : $response['errors'] ?? [];
         $this->source = exception_response($exception);
 
-//        return response()->json([$this->errors, $this->message, $this->status_code, $exception, $response]);
-
-//        return response()->json([$this->errors, $this->message, $this->status_code, $exception]);
-//        return response()->json([$this->errors, $this->message, $this->status_code]);
-//        return response()->json(array_unique($this->errors));
-
         return $this->response($this->status_code, $this->message, [], $this->errors ?? [], $this->source);
-//        return $this->response($this->status_code, $this->message, [], array_unique($this->errors) ?? []);
     }
-
 }

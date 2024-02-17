@@ -2,10 +2,10 @@
 
 namespace AbdullahMateen\LaravelHelpingMaterial\Enums\Media;
 
-use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsCodeInterface;
+use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsInterface;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Enum\GeneralTrait;
 
-enum MediaTypeEnum: int implements ColorsCodeInterface
+enum MediaTypeEnum: int implements ColorsInterface
 {
     use GeneralTrait;
 

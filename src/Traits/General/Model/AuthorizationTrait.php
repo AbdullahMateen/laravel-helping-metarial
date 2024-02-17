@@ -8,12 +8,12 @@ trait AuthorizationTrait
 {
     public static function authorizeViewAny()
     {
-        Gate::authorize('viewAny', get_called_class());
+        Gate::authorize('viewAny', static::class);
     }
 
     public static function authorizeCreate()
     {
-        Gate::authorize('create', get_called_class());
+        Gate::authorize('create', static::class);
     }
 
     public static function authorizeView($self)

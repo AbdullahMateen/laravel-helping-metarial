@@ -4,7 +4,7 @@
 namespace AbdullahMateen\LaravelHelpingMaterial\Interfaces;
 
 
-interface ColorsCodeInterface
+interface ColorsInterface
 {
     public const PRIMARY   = '#007bff';
     public const SECONDARY = '#6c757d';

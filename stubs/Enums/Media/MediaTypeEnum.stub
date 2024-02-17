@@ -2,10 +2,10 @@
 
 namespace App\Enums\Media;
 
-use App\Interfaces\ColorsCodeInterface;
+use App\Interfaces\ColorsInterface;
 use App\Traits\General\Enum\GeneralTrait;
 
-enum MediaTypeEnum: int implements ColorsCodeInterface
+enum MediaTypeEnum: int implements ColorsInterface
 {
     use GeneralTrait;
 
@@ -35,12 +35,6 @@ enum MediaTypeEnum: int implements ColorsCodeInterface
     public function toString(): string
     {
         return $this->name;
-        // return match ($this) {
-        //     self::Image    => 'Image',
-        //     self::Video    => 'Video',
-        //     self::Document => 'Document',
-        //     self::Archive  => 'Archive',
-        // };
     }
 
 }

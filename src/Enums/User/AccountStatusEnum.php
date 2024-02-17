@@ -2,10 +2,10 @@
 
 namespace AbdullahMateen\LaravelHelpingMaterial\Enums\User;
 
-use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsCodeInterface;
+use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsInterface;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Enum\GeneralTrait;
 
-enum AccountStatusEnum: int implements ColorsCodeInterface
+enum AccountStatusEnum: int implements ColorsInterface
 {
     use GeneralTrait;
 
@@ -28,6 +28,8 @@ enum AccountStatusEnum: int implements ColorsCodeInterface
     }
 
     /**
+     * Options to show in dropdown. User can be switched to these statuses
+     *
      * @return AccountStatusEnum[]
      */
     public static function editable(): array

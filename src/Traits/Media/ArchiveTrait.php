@@ -2,7 +2,6 @@
 
 namespace AbdullahMateen\LaravelHelpingMaterial\Traits\Media;
 
-
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 

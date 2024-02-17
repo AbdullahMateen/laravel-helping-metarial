@@ -2,17 +2,16 @@
 
 namespace App\Enums\Media;
 
-use App\Interfaces\ColorsCodeInterface;
+use App\Interfaces\ColorsInterface;
 use App\Traits\General\Enum\GeneralTrait;
 
-enum MediaDiskEnum: int implements ColorsCodeInterface
+enum MediaDiskEnum: int implements ColorsInterface
 {
     use GeneralTrait;
 
     case Temp = 1;
     case Project = 2;
     case Placeholders = 3;
-    case Archive = 4;
 
     /**
      * @return string
@@ -28,12 +27,6 @@ enum MediaDiskEnum: int implements ColorsCodeInterface
     public function toString(): string
     {
         return $this->name;
-        // return match ($this) {
-        //     self::Temp         => 'Temp',
-        //     self::Project      => 'Project',
-        //     self::Placeholders => 'Placeholders',
-        //     self::Archive      => 'Archive',
-        // };
     }
 
 }

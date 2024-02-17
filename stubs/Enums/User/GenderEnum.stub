@@ -2,10 +2,10 @@
 
 namespace App\Enums\User;
 
-use App\Interfaces\ColorsCodeInterface;
+use App\Interfaces\ColorsInterface;
 use App\Traits\General\Enum\GeneralTrait;
 
-enum GenderEnum: string implements ColorsCodeInterface
+enum GenderEnum: string implements ColorsInterface
 {
     use GeneralTrait;
 
@@ -19,11 +19,6 @@ enum GenderEnum: string implements ColorsCodeInterface
     public function toString(): string
     {
         return $this->name;
-        // return match ($this) {
-        //     self::Male   => 'Male',
-        //     self::Female => 'Female',
-        //     self::Other  => 'Other',
-        // };
     }
 
     /**

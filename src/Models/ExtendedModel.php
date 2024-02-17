@@ -3,22 +3,23 @@
 namespace AbdullahMateen\LaravelHelpingMaterial\Models;
 
 use AbdullahMateen\LaravelHelpingMaterial\Enums\StatusEnum;
-use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsCodeInterface;
+use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsInterface;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Model\AuthorizationTrait;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Model\ModelFetchTrait;
-use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Model\ValidationRulesTrait;
+use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Model\ScopeTrait;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Model\ValidationTrait;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * @method static columns()
  * @method static auth()
+ * @method static whereDateBetween()
  * @method static active()
  * @method static inactive()
  */
-class ExtendedModel extends Model implements ColorsCodeInterface
+class ExtendedModel extends Model implements ColorsInterface
 {
-    use AuthorizationTrait, ModelFetchTrait, ValidationRulesTrait, ValidationTrait;
+    use AuthorizationTrait, ModelFetchTrait, ScopeTrait, ValidationTrait;
 
     /*
     |--------------------------------------------------------------------------
@@ -73,29 +74,6 @@ class ExtendedModel extends Model implements ColorsCodeInterface
     |--------------------------------------------------------------------------
     */
 
-    public function scopeColumns($query, $columns = [], $overwrite = false)
-    {
-        $default = ['id', 'name'];
-        $columns = is_array($columns) ? $columns : explode(',', $columns);
-        $columns = $overwrite ? $columns : array_merge($default, $columns);
-        return $query->select($columns);
-    }
-
-    public function scopeAuth($query, $columnName = 'user_id')
-    {
-        if (!auth_check()) return $query;
-        return $query->where($columnName, '=', auth_id());
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where(get_model_table(get_called_class()) . '.status', '=', StatusEnum::Active->value);
-    }
-
-    public function scopeInactive($query)
-    {
-        return $query->where(get_model_table(get_called_class()) . '.status', '=', StatusEnum::InActive->value);
-    }
 
     /*
     |--------------------------------------------------------------------------
@@ -171,12 +149,12 @@ class ExtendedModel extends Model implements ColorsCodeInterface
 
     public function statusName()
     {
-        return !($this->status instanceof StatusEnum) ? StatusEnum::tryFrom($this->status)?->toString() : $this->status->toString();
+        return $this->status instanceof StatusEnum ? $this->status->toString() : StatusEnum::tryFrom($this->status)?->toString();
     }
 
     public function statusColor()
     {
-        return !($this->status instanceof StatusEnum) ? StatusEnum::tryFrom($this->status)?->color() : $this->status->color();
+        return $this->status instanceof StatusEnum ? $this->status->color() : StatusEnum::tryFrom($this->status)?->color();
     }
 
     /*

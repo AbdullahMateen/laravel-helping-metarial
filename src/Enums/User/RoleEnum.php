@@ -2,11 +2,10 @@
 
 namespace AbdullahMateen\LaravelHelpingMaterial\Enums\User;
 
-use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsCodeInterface;
+use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsInterface;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Enum\GeneralTrait;
-use JetBrains\PhpStorm\Pure;
 
-enum RoleEnum: int implements ColorsCodeInterface
+enum RoleEnum: int implements ColorsInterface
 {
     use GeneralTrait;
 
@@ -73,7 +72,6 @@ enum RoleEnum: int implements ColorsCodeInterface
     /**
      * @return string
      */
-    #[Pure]
     public function role(): string
     {
         return $this->toString();

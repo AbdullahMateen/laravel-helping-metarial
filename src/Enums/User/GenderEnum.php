@@ -2,10 +2,10 @@
 
 namespace AbdullahMateen\LaravelHelpingMaterial\Enums\User;
 
-use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsCodeInterface;
+use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsInterface;
 use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Enum\GeneralTrait;
 
-enum GenderEnum: string implements ColorsCodeInterface
+enum GenderEnum: string implements ColorsInterface
 {
     use GeneralTrait;
 

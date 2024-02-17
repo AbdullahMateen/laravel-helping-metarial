@@ -2,13 +2,9 @@
 
 use AbdullahMateen\LaravelHelpingMaterial\Enums\Media\MediaDiskEnum;
 use AbdullahMateen\LaravelHelpingMaterial\Enums\Media\MediaTypeEnum;
-use AbdullahMateen\LaravelHelpingMaterial\Models\Media;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use AbdullahMateen\LaravelHelpingMaterial\Services\Media\MediaService;
-use JetBrains\PhpStorm\ArrayShape;
-use JetBrains\PhpStorm\Pure;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,7 +56,6 @@ if (!function_exists('filesystems_setup')) {
      *
      * @return array{disks: array, links: array}
      */
-    #[ArrayShape(['disks' => "array", 'links' => "array"])]
     function filesystems_setup(bool $shared = false, string|null $sharedPath = null): array
     {
         $disks  = [];
@@ -233,7 +228,6 @@ if (!function_exists('is_media_type_of')) {
      *
      * @return string|null
      */
-    #[Pure]
     function is_media_type_of(string $string): string|null
     {
         try {

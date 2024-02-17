@@ -2,11 +2,10 @@
 
 namespace App\Enums\User;
 
-use App\Interfaces\ColorsCodeInterface;
+use App\Interfaces\ColorsInterface;
 use App\Traits\General\Enum\GeneralTrait;
-use JetBrains\PhpStorm\Pure;
 
-enum RoleEnum: int implements ColorsCodeInterface
+enum RoleEnum: int implements ColorsInterface
 {
     use GeneralTrait;
 
@@ -73,7 +72,6 @@ enum RoleEnum: int implements ColorsCodeInterface
     /**
      * @return string
      */
-    #[Pure]
     public function role(): string
     {
         return $this->toString();
