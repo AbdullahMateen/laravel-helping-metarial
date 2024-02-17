@@ -13,16 +13,62 @@ use Illuminate\Support\ServiceProvider;
 class LaravelHelpingMaterialServiceProvider extends ServiceProvider
 {
 
-    public function boot()
+    /**
+     * @return void
+     */
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
+
+            $this->publishes([
+                __DIR__ . '/Enums/' => app_path('Enums'),
+            ], 'lhm-enums');
+
             $this->publishes([
                 __DIR__ . '/Helpers/' => app_path('Helpers'),
             ], 'lhm-helpers');
+
+            $this->publishes([
+                __DIR__ . '/Interfaces/' => app_path('Interfaces'),
+            ], 'lhm-interfaces');
+
+            $this->publishes([
+                __DIR__ . '/Middleware/Custom/' => app_path('/Middleware/Custom'),
+            ], 'lhm-middleware');
+
+            $this->publishes([
+                __DIR__ . '/migrations/' => app_path('/database/migrations'),
+            ], 'lhm-migrations');
+
+            $this->publishes([
+                __DIR__ . '/Models/' => app_path('/Models'),
+            ], 'lhm-models');
+
+            $this->publishes([
+                __DIR__ . '/resources/sass/' => app_path('/resources/sass'),
+            ], 'lhm-sass');
+
+            $this->publishes([
+                __DIR__ . '/Rules/' => app_path('/Rules'),
+            ], 'lhm-rules');
+
+            $this->publishes([
+                __DIR__ . '/Services/' => app_path('/Services'),
+            ], 'lhm-services');
+
+            $this->publishes([
+                __DIR__ . '/Traits/' => app_path('/Traits'),
+            ], 'lhm-traits');
+
         }
     }
 
-    public function register()
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function register(): void
     {
         $this->app['router']->aliasMiddleware('authorize', AuthorizationMiddleware::class);
 
@@ -40,14 +86,20 @@ class LaravelHelpingMaterialServiceProvider extends ServiceProvider
         });
     }
 
-    private function bootDirectories()
+    /**
+     * @return void
+     */
+    private function bootDirectories(): void
     {
         if (!File::exists(public_path('media'))) {
             File::makeDirectory(public_path('media'), 0777, true);
         }
     }
 
-    private function bootDirectives()
+    /**
+     * @return void
+     */
+    private function bootDirectives(): void
     {
         Blade::directive('hasError', function ($keys) {
             return "<?php
