@@ -8,7 +8,7 @@ use Illuminate\Filesystem\Filesystem;
 class LhmPublishCommand extends Command
 {
     private Filesystem $filesystem;
-    private string $prefix;
+    private string     $prefix;
 
     /**
      * The name and signature of the console command.
@@ -22,7 +22,7 @@ class LhmPublishCommand extends Command
      *
      * @var string
      */
-    protected      $description = 'Publish the laravel helping material files';
+    protected $description = 'Publish the laravel helping material files';
 
     /**
      * @param Filesystem $files
@@ -31,7 +31,7 @@ class LhmPublishCommand extends Command
     {
         parent::__construct();
         $this->filesystem = $filesystem;
-        $this->prefix = base_path('vendor\abdullah-mateen\laravel-helping-metarial');
+        $this->prefix     = base_path('vendor\abdullah-mateen\laravel-helping-metarial');
     }
 
     /**
