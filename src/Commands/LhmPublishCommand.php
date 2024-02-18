@@ -24,14 +24,21 @@ class LhmPublishCommand extends Command
     protected $description = 'Publish the laravel helping material files';
 
     /**
+     * @param Filesystem $files
+     */
+    public function __construct(Filesystem $filesystem)
+    {
+        parent::__construct();
+        $this->filesystem = $filesystem;
+    }
+
+    /**
      * Execute the console command.
      *
      * @return int
      */
-    public function handle(Filesystem $filesystem)
+    public function handle()
     {
-        $this->filesystem = $filesystem;
-
         $options = [
             'All',
             'Enums',

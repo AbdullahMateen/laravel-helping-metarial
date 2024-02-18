@@ -2,6 +2,7 @@
 
 namespace AbdullahMateen\LaravelHelpingMaterial;
 
+use AbdullahMateen\LaravelHelpingMaterial\Commands\LhmPublishCommand;
 use AbdullahMateen\LaravelHelpingMaterial\Middleware\Custom\AuthorizationMiddleware;
 use AbdullahMateen\LaravelHelpingMaterial\Services\Media\MediaService;
 use Illuminate\Database\Eloquent\Model;
@@ -108,6 +109,14 @@ class LaravelHelpingMaterialServiceProvider extends ServiceProvider
         $this->app->bind('MediaService', function () {
             return new MediaService();
         });
+
+        $this->app->singleton(
+            'command.lhm.publish',
+            function ($app) {
+                return new LhmPublishCommand($app['files']);
+            }
+        );
+        $this->commands('command.lhm.publish');
     }
 
     /**
