@@ -47,7 +47,7 @@ class LhmPublishCommand extends Command
         ];
 
         $values = array_unique($this->choice(
-            "Which files would you like to publish? You can select multiples using",
+            "Which files would you like to publish? You can select multiples using comma (,) e.g. 1,2,3",
             $options,
             null,
             null,
