@@ -117,6 +117,19 @@ trait GeneralTrait
     }
 
     /**
+     * @param string $column
+     * @param string $function
+     * @param bool   $toString
+     *
+     * @return array|string
+     */
+    public static function column(string $column = 'value', string $function = 'cases', bool $toString = false): array|string
+    {
+        $array = array_column(self::toFullArray($function), $column);
+        return $toString ? implode(',', $array) : $array;
+    }
+
+    /**
      * @return array
      */
     public static function toFullArrayInclude(): array { return []; }

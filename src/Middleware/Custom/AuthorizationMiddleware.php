@@ -2,6 +2,7 @@
 
 namespace AbdullahMateen\LaravelHelpingMaterial\Middleware\Custom;
 
+use AbdullahMateen\LaravelHelpingMaterial\Enums\User\RoleEnum;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -16,9 +17,14 @@ class AuthorizationMiddleware
      *
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, ...$userLevel)
+    public function handle(Request $request, Closure $next, ...$userLevels)
     {
-        abort_unless(is_level($userLevel), 404);
+        $levels = [];
+        foreach ($userLevels as $userLevel) {
+            $levels[] = $userLevel instanceof RoleEnum ? $userLevel->value : $userLevel;
+        }
+
+        abort_unless(is_level($levels), 404);
         return $next($request);
     }
 }
