@@ -1,3 +1,5 @@
+[<img alt="Laravel Helping Material" src="./images/banner.png"/>](./images/banner.png)
+
 # <p align="center">Laravel Helping Material</p>
 
 > This package is a collection of useful tools for Laravel developers. It includes helper functions for common tasks, enums for defining constants, helpful traits for models and controllers, laravel validation rules for custom validations, and a simple media upload library for handling file uploads. This package aims to make Laravel development easier and faster.
@@ -32,12 +34,12 @@ This package offers a variety of features to enhance your web development experi
 
 - Enums: Define and use enum types in your code for better readability and consistency.
 - Helpers: Use handy functions and macros to simplify common tasks and operations.
-- Colors Interface: Create and manipulate colors using a fluent and intuitive interface.
+- Colors Interface: A list of colors classes and RGBA codes.
 - Authorization Middleware: Protect your routes and controllers with customizable authorization logic.
 - General Model: Use a base model class that provides common functionality and traits for your models.
 - Helpful Css: Apply some useful css classes to your elements (if you are not using tailwind).
 - Validation Rules: Validate your data with custom rules and messages.
-- Some Helpful Traits: Use traits to add behavior and functionality to your classes, such as sluggable, sortable, filterable, etc.
+- Some Helpful Traits: Use traits to add behavior and functionality to your enums, classes and controllers.
 - Simple Media Library: Manage your media files and attachments with ease.
 
 This package is designed to help you with your web development projects. We hope you find it useful and enjoyable.
@@ -217,406 +219,66 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('aut
 
 [(Back to top)](#table-of-contents)
 
-```js
-useBasicFetch(url
-:
-string = '', delay
-:
-number = 0
-)
-```
-
-Supported options and result fields for the `useBasicFetch` hook are listed below.
-
-#### Options
-
-`url`
-
-| Type   | Default value |
-|--------|---------------|
-| string | ''            |
-
-If present, the request will be performed as soon as the component is mounted
-
-Example:
-
-```tsx
-const MyComponent: React.FC = () => {
-    const {data, error, loading} = useBasicFetch('https://api.icndb.com/jokes/random');
-
-    if (error) {
-        return <p>Error</p>;
-    }
-
-    if (loading) {
-        return <p>Loading...</p>;
-    }
-
-    return (
-        <div className="App">
-            <h2>Chuck Norris Joke of the day</h2>
-            {data && data.value && <p>{data.value.joke}</p>}
-        </div>
-    );
-};
-```
-
-`delay`
-
-| Type   | Default value | Description          |
-|--------|---------------|----------------------|
-| number | 0             | Time in milliseconds |
-
-If present, the request will be delayed by the given amount of time
-
-Example:
-
-```tsx
-type Joke = {
-    value: {
-        id: number;
-        joke: string;
-    };
-};
-
-const MyComponent: React.FC = () => {
-    const {data, error, loading} = useBasicFetch<Joke>('https://api.icndb.com/jokes/random', 2000);
-
-    if (error) {
-        return <p>Error</p>;
-    }
+[//]: # (## Contributing)
 
-    if (loading) {
-        return <p>Loading...</p>;
-    }
+[//]: # ()
+[//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
 
-    return (
-        <div className="App">
-            <h2>Chuck Norris Joke of the day</h2>
-            {data && data.value && <p>{data.value.joke}</p>}
-        </div>
-    );
-};
-```
+[//]: # ()
+[//]: # ([//]: # &#40;Please read [CONTRIBUTING.md]&#40;CONTRIBUTING.md&#41; for details on our code of conduct, and the process for submitting pull requests to us.&#41;)
+[//]: # ()
+[//]: # ([//]: # &#40;&#41;)
+[//]: # ([//]: # &#40;1. Fork it!&#41;)
+[//]: # ()
+[//]: # ([//]: # &#40;2. Create your feature branch: `git checkout -b my-new-feature`&#41;)
+[//]: # ()
+[//]: # ([//]: # &#40;3. Add your changes: `git add .`&#41;)
+[//]: # ()
+[//]: # ([//]: # &#40;4. Commit your changes: `git commit -am 'Add some feature'`&#41;)
+[//]: # ()
+[//]: # ([//]: # &#40;5. Push to the branch: `git push origin my-new-feature`&#41;)
+[//]: # ()
+[//]: # ([//]: # &#40;6. Submit a pull request :sunglasses:&#41;)
+[//]: # ()
+[//]: # (## Credits)
 
-### fetchData
+[//]: # ()
+[//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
 
-```js
-fetchData(url
-:
-string
-)
-```
+[//]: # ()
+[//]: # (## Built With)
 
-Perform an asynchronous http request against a given url
+[//]: # ()
+[//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
 
-```tsx
-type Joke = {
-    value: {
-        id: number;
-        joke: string;
-    };
-};
+[//]: # ()
+[//]: # (## Versioning)
 
-const ChuckNorrisJokes: React.FC = () => {
-    const {data, fetchData, error, loading} = useBasicFetch<Joke>();
-    const [jokeId, setJokeId] = useState(1);
+[//]: # ()
+[//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
 
-    useEffect(() => {
-        fetchData(`https://api.icndb.com/jokes/${jokeId}`);
-    }, [jokeId, fetchData]);
+[//]: # ()
+[//]: # (We use [SemVer]&#40;http://semver.org/&#41; for versioning. For the versions available, see the [tags on this repository]&#40;https://github.com/your/project/tags&#41;.)
 
-    const handleNext = () => setJokeId(jokeId + 1);
+[//]: # ()
+[//]: # (## Authors)
 
-    if (error) {
-        return <p>Error</p>;
-    }
+[//]: # ()
+[//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
 
-    const jokeData = data && data.value;
+[//]: # ()
+[//]: # (* **John Doe** - *Initial work* - [JohnDoe]&#40;https://github.com/JohnDoe&#41;)
 
-    return (
-        <div className="Comments">
-            {loading && <p>Loading...</p>}
-            {!loading && jokeData && (
-                <div>
-                    <p>Joke ID: {jokeData.id}</p>
-                    <p>{jokeData.joke}</p>
-                </div>
-            )}
-            {!loading && jokeData && !jokeData.joke && <p>{jokeData}</p>}
-            <button disabled={loading} onClick={handleNext}>
-                Next Joke
-            </button>
-        </div>
-    );
-};
-```
+[//]: # ()
+[//]: # (See also the list of [contributors]&#40;https://github.com/your/project/contributors&#41; who participated in this project.)
 
-## Contributing
+[//]: # ()
+[//]: # (## License)
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+[//]: # ()
+[//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
 
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Add your changes: `git add .`
-4. Commit your changes: `git commit -am 'Add some feature'`
-5. Push to the branch: `git push origin my-new-feature`
-6. Submit a pull request :sunglasses:
+[//]: # ()
+[//]: # (The MIT License &#40;MIT&#41; 2024 - [Athitya Kumar]&#40;https://github.com/athityakumar/&#41;. Please have a look at the [LICENSE.md]&#40;LICENSE.md&#41; for more details.)
 
-## Credits
-
-TODO: Write credits
-
-## Built With
-
-* Dropwizard - Bla bla bla
-* Maven - Maybe
-* Atom - ergaerga
-* Love
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
-
-## Authors
-
-* **John Doe** - *Initial work* - [JohnDoe](https://github.com/JohnDoe)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-[MIT License](https://andreasonny.mit-license.org/2019) © Andrea SonnY
-
-# Color LS
-
-[![forthebadge](http://forthebadge.com/images/badges/made-with-ruby.svg)](http://forthebadge.com)
-[![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
-
-[![Gem Version](https://badge.fury.io/rb/colorls.svg)](https://badge.fury.io/rb/colorls)
-[![CI](https://github.com/athityakumar/colorls/actions/workflows/ruby.yml/badge.svg)](https://github.com/athityakumar/colorls/actions/workflows/ruby.yml)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=shields)](http://makeapullrequest.com)
-
-A Ruby script that colorizes the `ls` output with color and icons. Here are the screenshots of working example on an iTerm2 terminal (Mac OS), `oh-my-zsh` with `powerlevel9k` theme and `powerline nerd-font + awesome-config` font with the `Solarized Dark` color theme.
-
-![image](https://user-images.githubusercontent.com/17109060/32149040-04f3125c-bd25-11e7-8003-66fd29bc18d4.png)
-
-*If you're interested in knowing the powerlevel9k configuration to get this prompt, have a look at [this gist](https://gist.github.com/athityakumar/1bd5e9e24cd2a1891565573a893993eb).*
-
-# Table of contents
-
-- [Usage](#usage)
-    - [Flags](#flags)
-        - `-1`
-        - `-a`   (or) `--all`
-        - `-A`   (or) `--almost-all`
-        - `-d`   (or) `--dirs`
-        - `-f`   (or) `--files`
-        - `--help`
-        - `-l`   (or) `--long`
-        - `--report`
-        - `--tree` (or) `--tree=[DEPTH]`
-        - `--gs` (or) `--git-status`
-        - `--sd` (or) `--sort-dirs` or `--group-directories-first`
-        - `--sf` (or) `--sort-files`
-        - `-t`
-    - [Combination of flags](#combination-of-flags)
-- [Installation](#installation)
-- [Recommended configurations](#recommended-configurations)
-- [Custom configurations](#custom-configurations)
-- [Updating](#updating)
-- [Uninstallation](#uninstallation)
-- [Contributing](#contributing)
-- [License](#license)
-
-# Usage
-
-[(Back to top)](#table-of-contents)
-
-Man pages have been added. Checkout `man colorls`.
-
-### Flags
-
-- With `-1` : Lists one entry per line
-
-
-- With `-a` (or) `--all` : Does not ignore entries starting with '.'
-
-
-- With `-A` (or) `--almost-all` : Does not ignore entries starting with '.', except `./` and `../`
-
-
-- With `-d` (or) `--dirs` : Shows only directories
-
-
-- With `-f` (or) `--files` : Shows only files
-
-
-- With `--help` : Prints a very helpful help menu
-
-
-- With `-l` (or) `--long` : Shows in long listing format
-
-
-- With `--report` : Shows brief report about number of files and folders shown
-
-
-- With `--tree` (or) `--tree=[DEPTH]` : Shows tree view of the directory with the specified depth (default 3)
-
-
-- With `--gs` (or) `--git-status` : Shows git status for each entry
-
-
-- With `--sd` (or) `--sort-dirs` or `--group-directories-first` : Shows directories first, followed by files
-
-
-- With `--sf` (or) `--sort-files` : Shows files first, followed by directories
-
-
-- With `-t` : Sort by modification time, newest first (NEED TO ADD IMAGE)
-
-- With color options : `--light` or `--dark` can be passed as a flag, to choose the appropriate color scheme. By default, the dark color scheme is chosen. In order to tweak any color, read [Custom configurations](#custom-configurations).
-
-### Combination of flags
-
-- Using `--gs` with `-t` :
-
-
-- Using `--gs` with `-l` :
-
-
-- Using `--sd` with `-l` and `-A` :
-
-
-- Using `--non-human-readable` with `-l` :
-    - This will print the file sizes in bytes (non-human readable format)
-
-# Installation
-
-[(Back to top)](#table-of-contents)
-
-1. Install Ruby (preferably, version >= 2.6)
-2. [Download](https://www.nerdfonts.com/font-downloads) and install a Nerd Font. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for installation instructions.
-
-   *Note for `iTerm2` users - Please enable the Nerd Font at iTerm2 > Preferences > Profiles > Text > Non-ASCII font > Hack Regular Nerd Font Complete.*
-
-   *Note for `HyperJS` users - Please add `"Hack Nerd Font"` Font as an option to `fontFamily` in your `~/.hyper.js` file.*
-
-3. Install the [colorls](https://rubygems.org/gems/colorls/) ruby gem with `gem install colorls`
-
-   *Note for `rbenv` users - In case of load error when using `lc`, please try the below patch.*
-
-    ```sh
-    rbenv rehash
-    rehash
-    ```
-
-4. Enable tab completion for flags by entering following line to your shell configuration file (`~/.bashrc` or `~/.zshrc`) :
-    ```bash
-    source $(dirname $(gem which colorls))/tab_complete.sh
-    ```
-
-5. Start using `colorls` :tada:
-
-6. Have a look at [Recommended configurations](#recommended-configurations) and [Custom configurations](#custom-configurations).
-
-# Recommended configurations
-
-[(Back to top)](#table-of-contents)
-
-1. To add some short command (say, `lc`) with some flag options (say, `-l`, `-A`, `--sd`) by default, add this to your shell configuration file (`~/.bashrc`, `~/.zshrc`, etc.) :
-    ```sh
-    alias lc='colorls -lA --sd'
-    ```
-
-2. For changing the icon(s) to other unicode icons of choice (select icons from [here](https://nerdfonts.com/)), change the YAML files in a text editor of your choice (say, `subl`)
-
-    ```sh
-    subl $(dirname $(gem which colorls))/yaml
-    ```
-
-# Custom configurations
-
-[(Back to top)](#table-of-contents)
-
-You can overwrite the existing icons and colors mapping by copying the yaml files from `$(dirname $(gem which colorls))/yaml` into `~/.config/colorls`, and changing them.
-
-- To overwrite color mapping :
-
-  Please have a look at the [list of supported color names](https://github.com/sickill/rainbow#color-list). You may also use a color hex code as long as it is quoted within the YAML file and prefaced with a `#` symbol.
-
-  Let's say that you're using the dark color scheme and would like to change the color of untracked file (`??`) in the `--git-status` flag to yellow. Copy the defaut `dark_colors.yaml` and change it.
-
-  Check if the `~/.config/colorls` directory exists. If it doesn't exist, create it using the following command:
-
-  ```sh
-  mkdir -p ~/.config/colorls
-  ```
-
-  And then
-
-  ```sh
-  cp $(dirname $(gem which colorls))/yaml/dark_colors.yaml ~/.config/colorls/dark_colors.yaml
-  ```
-
-  In the `~/.config/colorls/dark_colors.yaml` file, change the color set for `untracked` from `darkorange` to `yellow`, and save the change.
-
-  ```
-  untracked: yellow
-  ```
-
-  Or, using hex color codes:
-
-  ```
-  untracked: '#FFFF00'
-  ```
-
-- To overwrite icon mapping :
-
-  Please have a look at the [list of supported icons](https://nerdfonts.com/). Let's say you want to add an icon for swift files. Copy the default `files.yaml` and change it.
-
-  ```sh
-  cp $(dirname $(gem which colorls))/yaml/files.yaml ~/.config/colorls/files.yaml`
-  ```
-
-  In the `~/.config/colorls/files.yaml` file, add a new icon / change an existing icon, and save the change.
-
-  ```
-  swift: "\uF179"
-  ```
-
-- User contributed alias configurations :
-
-    - [@rjhilgefort](https://gist.github.com/rjhilgefort/51ea47dd91bcd90cd6d9b3b199188c16)
-
-# Updating
-
-[(Back to top)](#table-of-contents)
-
-Want to update to the latest version of `colorls`?
-
-```sh
-gem update colorls
-```
-
-# Uninstallation
-
-[(Back to top)](#table-of-contents)
-
-Want to uninstall and revert back to the old style? No issues (sob). Please feel free to open an issue regarding how we can enhance `colorls`.
-
-```sh
-gem uninstall colorls
-```
-
-# Contributing
-
-[(Back to top)](#table-of-contents)
-
-Your contributions are always welcome! Please have a look at the [contribution guidelines](CONTRIBUTING.md) first. :tada:
-
-# License
-
-[(Back to top)](#table-of-contents)
-
-The MIT License (MIT) 2017 - [Athitya Kumar](https://github.com/athityakumar/). Please have a look at the [LICENSE.md](LICENSE.md) for more details.
+[//]: # ([MIT License]&#40;https://andreasonny.mit-license.org/2019&#41; © Andrea SonnY)
