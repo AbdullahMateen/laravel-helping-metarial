@@ -21,11 +21,7 @@
     - [Rules](#rules)
     - [Simple Media Library](#)
     - [Simple Media Library](#simple-media-library)
-- [Contributing](#contributing)
-- [Credits](#credits)
-- [Built With](#built-with)
-- [Versioning](#versioning)
-- [Authors](#authors)
+- [Authors](#author)
 - [License](#license)
 
 ## Getting Started
@@ -224,61 +220,29 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('aut
 [//]: # ()
 [//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
 
-[//]: # ()
-[//]: # ([//]: # &#40;Please read [CONTRIBUTING.md]&#40;CONTRIBUTING.md&#41; for details on our code of conduct, and the process for submitting pull requests to us.&#41;)
-[//]: # ()
-[//]: # ([//]: # &#40;&#41;)
-[//]: # ([//]: # &#40;1. Fork it!&#41;)
-[//]: # ()
-[//]: # ([//]: # &#40;2. Create your feature branch: `git checkout -b my-new-feature`&#41;)
-[//]: # ()
-[//]: # ([//]: # &#40;3. Add your changes: `git add .`&#41;)
-[//]: # ()
-[//]: # ([//]: # &#40;4. Commit your changes: `git commit -am 'Add some feature'`&#41;)
-[//]: # ()
-[//]: # ([//]: # &#40;5. Push to the branch: `git push origin my-new-feature`&#41;)
-[//]: # ()
-[//]: # ([//]: # &#40;6. Submit a pull request :sunglasses:&#41;)
-[//]: # ()
-[//]: # (## Credits)
+[//]: # (Please read [CONTRIBUTING.md]&#40;CONTRIBUTING.md&#41; for details on our code of conduct, and the process for submitting pull requests to us.)
 
 [//]: # ()
-[//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
+[//]: # (1. Fork it!)
 
-[//]: # ()
-[//]: # (## Built With)
+[//]: # (2. Create your feature branch: `git checkout -b my-new-feature`)
 
-[//]: # ()
-[//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
+[//]: # (3. Add your changes: `git add .`)
 
-[//]: # ()
-[//]: # (## Versioning)
+[//]: # (4. Commit your changes: `git commit -am 'Add some feature'`)
 
-[//]: # ()
-[//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
+[//]: # (5. Push to the branch: `git push origin my-new-feature`)
 
-[//]: # ()
-[//]: # (We use [SemVer]&#40;http://semver.org/&#41; for versioning. For the versions available, see the [tags on this repository]&#40;https://github.com/your/project/tags&#41;.)
+[//]: # (6. Submit a pull request :sunglasses:)
 
-[//]: # ()
-[//]: # (## Authors)
+## Author
 
-[//]: # ()
-[//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
+[(Back to top)](#table-of-contents)
 
-[//]: # ()
-[//]: # (* **John Doe** - *Initial work* - [JohnDoe]&#40;https://github.com/JohnDoe&#41;)
+* **Abdullah Mateen** - *Initial work* - [Abdullah Mateen](https://github.com/AbdullahMateen/laravel-helping-metarial)
 
-[//]: # ()
-[//]: # (See also the list of [contributors]&#40;https://github.com/your/project/contributors&#41; who participated in this project.)
+## License
 
-[//]: # ()
-[//]: # (## License)
+[(Back to top)](#table-of-contents)
 
-[//]: # ()
-[//]: # ([&#40;Back to top&#41;]&#40;#table-of-contents&#41;)
-
-[//]: # ()
-[//]: # (The MIT License &#40;MIT&#41; 2024 - [Athitya Kumar]&#40;https://github.com/athityakumar/&#41;. Please have a look at the [LICENSE.md]&#40;LICENSE.md&#41; for more details.)
-
-[//]: # ([MIT License]&#40;https://andreasonny.mit-license.org/2019&#41; © Andrea SonnY)
+The MIT License (MIT) 2024 - [Abdullah Mateen](https://github.com/AbdullahMateen/laravel-helping-metarial). Please have a look at the [LICENSE.md](LICENSE.md) for more details.
