@@ -2,7 +2,7 @@
 
 namespace App\Traits\General\Model;
 
-use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Model\UserNotificationsTrait as BaseUserNotificationsTrait
+use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Model\UserNotificationsTrait as BaseUserNotificationsTrait;
 
 trait UserNotificationsTrait
 {

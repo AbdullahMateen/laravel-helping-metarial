@@ -43,16 +43,16 @@ class LhmPublishCommand extends Command
     {
         $options = [
             'All',
-            'Enums',
-            'Helpers',
-            'Interfaces',
-            'Middlewares',
-            'Migrations',
-            'Models',
-            'Rules',
-            'Services',
-            'Traits',
-            'Resources',
+            'Enums          => Copy enum files',
+            'Helpers        => Copy helper files',
+            'Interfaces     => Copy interface files',
+            'Middlewares    => Override middleware',
+            'Migrations     => Copy migrations',
+            'Models         => Override model files',
+            'Rules          => Override rule files',
+            'Services       => Override service files',
+            'Traits         => Override trait files',
+            'Resources      => Copy resources',
         ];
 
         $values = array_unique($this->choice(
@@ -181,8 +181,8 @@ class LhmPublishCommand extends Command
 
     public function publishResources()
     {
-        $this->filesystem->ensureDirectoryExists(base_path('resources/sass'));
-        $this->filesystem->copy("$this->prefix/src/resources/sass/", base_path('resources/sass'));
+        $this->filesystem->ensureDirectoryExists(base_path('resources/sass/utilities'));
+        $this->filesystem->copyDirectory("$this->prefix/src/resources/sass/utilities", base_path('resources/sass/utilities'));
         return base_path('resources/sass');
     }
 

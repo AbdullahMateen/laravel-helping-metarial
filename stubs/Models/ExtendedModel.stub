@@ -2,22 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\StatusEnum;
-use App\Interfaces\ColorsInterface;
-use App\Traits\General\Model\AuthorizationTrait;
-use App\Traits\General\Model\ModelFetchTrait;
-use App\Traits\General\Model\ScopeTrait;
-use App\Traits\General\Model\ValidationTrait;
-use Illuminate\Database\Eloquent\Model;
-use AbdullahMateen\LaravelHelpingMaterial\Models\ExtendedModel as BaseModel
+use AbdullahMateen\LaravelHelpingMaterial\Models\ExtendedModel as BaseModel;
 
-/**
- * @method static columns()
- * @method static auth()
- * @method static whereDateBetween()
- * @method static active()
- * @method static inactive()
- */
 class ExtendedModel extends BaseModel
 {
 

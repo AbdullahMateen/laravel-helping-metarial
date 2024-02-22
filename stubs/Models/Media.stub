@@ -2,9 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\Media\MediaDiskEnum;
-use App\Enums\Media\MediaTypeEnum;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use AbdullahMateen\LaravelHelpingMaterial\Models\Media as BaseModel;
 
 class Media extends BaseModel

@@ -2,8 +2,7 @@
 
 namespace App\Traits\Api;
 
-use Symfony\Component\HttpFoundation\Response;
-use AbdullahMateen\LaravelHelpingMaterial\Traits\Api\ApiResponseTrait as BaseApiResponseTrait
+use AbdullahMateen\LaravelHelpingMaterial\Traits\Api\ApiResponseTrait as BaseApiResponseTrait;
 
 trait ApiResponseTrait
 {

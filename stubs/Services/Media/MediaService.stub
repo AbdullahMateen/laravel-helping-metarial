@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Service\Media;
+namespace App\Services\Media;
 
-use AbdullahMateen\LaravelHelpingMaterial\Services\Media\MediaService as BaseService
+use AbdullahMateen\LaravelHelpingMaterial\Services\Media\MediaService as BaseService;
 
 class MediaService extends BaseService
 {
