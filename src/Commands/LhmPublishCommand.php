@@ -164,7 +164,7 @@ class LhmPublishCommand extends Command
 
         $this->filesystem->ensureDirectoryExists(base_path('app/Traits/General/Model'));
         $this->filesystem->copy("$this->prefix/stubs/Traits/General/Model/AuthorizationTrait.stub", base_path('app/Traits/General/Model/AuthorizationTrait.php'));
-        $this->filesystem->copy("$this->prefix/stubs/Traits/General/Model/Encryptable.stub", base_path('app/Traits/General/Model/Encryptable.php'));
+        $this->filesystem->copy("$this->prefix/stubs/Traits/General/Model/EncryptableTrait.stub", base_path('app/Traits/General/Model/EncryptableTrait.php'));
         $this->filesystem->copy("$this->prefix/stubs/Traits/General/Model/ModelFetchTrait.stub", base_path('app/Traits/General/Model/ModelFetchTrait.php'));
         $this->filesystem->copy("$this->prefix/stubs/Traits/General/Model/ScopeTrait.stub", base_path('app/Traits/General/Model/ScopeTrait.php'));
         $this->filesystem->copy("$this->prefix/stubs/Traits/General/Model/UserNotificationsTrait.stub", base_path('app/Traits/General/Model/UserNotificationsTrait.php'));
