@@ -2,8 +2,8 @@
 
 namespace App\Enums\Media;
 
-use App\Interfaces\ColorsInterface;
-use App\Traits\General\Enum\GeneralTrait;
+use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsInterface;
+use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Enum\GeneralTrait;
 
 enum MediaDiskEnum: int implements ColorsInterface
 {

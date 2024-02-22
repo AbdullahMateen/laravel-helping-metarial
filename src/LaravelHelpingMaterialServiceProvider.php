@@ -95,7 +95,7 @@ class LaravelHelpingMaterialServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        Model::preventLazyLoading(!$this->app->isProduction());
+        Model::shouldBeStrict(!$this->app->isProduction());
 
         if (function_exists('get_morphs_maps')) {
             Relation::enforceMorphMap(get_morphs_maps());

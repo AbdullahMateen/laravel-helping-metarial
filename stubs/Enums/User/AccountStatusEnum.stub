@@ -2,8 +2,8 @@
 
 namespace App\Enums\User;
 
-use App\Interfaces\ColorsInterface;
-use App\Traits\General\Enum\GeneralTrait;
+use AbdullahMateen\LaravelHelpingMaterial\Interfaces\ColorsInterface;
+use AbdullahMateen\LaravelHelpingMaterial\Traits\General\Enum\GeneralTrait;
 
 enum AccountStatusEnum: int implements ColorsInterface
 {

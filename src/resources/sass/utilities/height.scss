@@ -20,7 +20,7 @@ $heights: "";
   }
 }
 
-@each $value in $widths {
+@each $value in $heights {
   .h-#{$value}p {
     height: #{$value} + '%' !important;
   }
