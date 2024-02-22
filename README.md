@@ -123,7 +123,7 @@ User::create([
 
 [(Back to top)](#table-of-contents)
 
-<small style="color: #f00;font-weight: bold;">list of helper functions will be available soon.</small> For now you can have a look at available functions [here](https://github.com/AbdullahMateen/laravel-helping-metarial/tree/1.x/src/Helpers)
+*<small style="color: #f00;font-weight: bold;">list of helper functions will be available soon.</small>* For now you can have a look at available functions [here](https://github.com/AbdullahMateen/laravel-helping-metarial/tree/1.x/src/Helpers)
 
 The helper functions are not automatically registered by default. To utilize these helper functions, you must first publish them using the command `php artisan lhm:publish` and select the helper functions options. Afterward, navigate to your `composer.json` file and perform the following steps:
 
