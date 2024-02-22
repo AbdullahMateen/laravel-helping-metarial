@@ -129,16 +129,11 @@ The helper functions are not automatically registered by default. To utilize the
 
 ```json
 {
-  // ...
-
   "autoload": {
-    // ...
     "files": [
       "src/Helpers/helpers.php"
     ]
-  },
-  
-  // ...
+  }
 }
 ```
 
@@ -209,11 +204,11 @@ The middleware is pre-registered, but if you have published it using the command
 ```php
   // ...
 
-    protected $routeMiddleware = [
-        // ...
-      
-        'custom-authorize' => \App\Http\Middleware\Custom\AuthorizationMiddleware::class,
-    ];
+  protected $routeMiddleware = [
+      // ...
+    
+      'custom-authorize' => \App\Http\Middleware\Custom\AuthorizationMiddleware::class,
+  ];
 ```
 
 #### Example
