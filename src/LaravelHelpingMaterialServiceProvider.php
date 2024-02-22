@@ -95,28 +95,20 @@ class LaravelHelpingMaterialServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app['router']->aliasMiddleware('authorize', AuthorizationMiddleware::class);
-
         Model::preventLazyLoading(!$this->app->isProduction());
 
         if (function_exists('get_morphs_maps')) {
             Relation::enforceMorphMap(get_morphs_maps());
         }
 
+        $this->app['router']->aliasMiddleware('authorize', AuthorizationMiddleware::class);
+        $this->loadMigrationsFrom(__DIR__ . '/migrations');
+
+        $this->registerFacades();
+        $this->registerCommands();
+
         $this->bootDirectories();
         $this->bootDirectives();
-
-        $this->app->bind('MediaService', function () {
-            return new MediaService();
-        });
-
-        $this->app->singleton(
-            'command.lhm.publish',
-            function ($app) {
-                return new LhmPublishCommand($app['files']);
-            }
-        );
-        $this->commands('command.lhm.publish');
     }
 
     /**
@@ -157,4 +149,30 @@ class LaravelHelpingMaterialServiceProvider extends ServiceProvider
             ?>";
         });
     }
+
+    /**
+     * @return void
+     */
+    private function registerFacades(): void
+    {
+        $this->app->bind('MediaService', function () {
+            return new MediaService();
+        });
+    }
+
+    /**
+     * @return void
+     */
+    private function registerCommands(): void
+    {
+        $this->app->singleton(
+            'command.lhm.publish',
+            function ($app) {
+                return new LhmPublishCommand($app['files']);
+            }
+        );
+        $this->commands('command.lhm.publish');
+    }
+
+
 }

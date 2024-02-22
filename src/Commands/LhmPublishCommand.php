@@ -63,8 +63,10 @@ class LhmPublishCommand extends Command
             true
         ));
 
+        $values = array_map(fn ($value) => trim(explode('=>', $value)[0]), $values);
         $publishAll = in_array('All', $values, true);
         if ($publishAll) {
+            $options = array_map(fn ($option) => trim(explode('=>', $option)[0]), $options);
             array_shift($options);
             $values = $options;
         }
@@ -125,7 +127,7 @@ class LhmPublishCommand extends Command
     public function publishMigrations()
     {
         $this->filesystem->ensureDirectoryExists(base_path('database/migrations'));
-        $this->filesystem->copy("$this->prefix/src/migrations/2024_02_17_053998_create_media_table.php", base_path('database/migrations/2024_02_17_053998_create_media_table.php'));
+        $this->filesystem->copyDirectory("$this->prefix/src/migrations/", base_path('database/migrations/'));
         return base_path('database/migrations');
     }
 
@@ -181,8 +183,8 @@ class LhmPublishCommand extends Command
 
     public function publishResources()
     {
-        $this->filesystem->ensureDirectoryExists(base_path('resources/sass/utilities'));
-        $this->filesystem->copyDirectory("$this->prefix/src/resources/sass/utilities", base_path('resources/sass/utilities'));
+        $this->filesystem->ensureDirectoryExists(base_path('resources/sass/'));
+        $this->filesystem->copyDirectory("$this->prefix/src/resources/sass/", base_path('resources/sass/'));
         return base_path('resources/sass');
     }
 

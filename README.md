@@ -125,6 +125,25 @@ User::create([
 
 <small style="color: #f00;font-weight: bold;">list of helper functions will be available soon.</small> For now you can have a look at available functions [here](https://github.com/AbdullahMateen/laravel-helping-metarial/tree/1.x/src/Helpers)
 
+The helper functions are not automatically registered by default. To utilize these helper functions, you must first publish them using the command `php artisan lhm:publish` and select the helper functions options. Afterward, navigate to your `composer.json` file and perform the following steps:
+
+```json
+{
+  // ...
+
+  "autoload": {
+    // ...
+    "files": [
+      "src/Helpers/helpers.php"
+    ]
+  },
+  
+  // ...
+}
+```
+
+Finally, run the command `composer dump-autoload` or its shorthand `composer du` in your current directory terminal.
+
 #### Example
 
 ```php
@@ -185,6 +204,18 @@ class Example implements ColorsInterface {
 |-------------------------|----------------------------|-------------------------------------------------------------------|
 | AuthorizationMiddleware | `authorize:1001,3001,5001` | This middleware is used to authorize users based on their levels. |
 
+The middleware is pre-registered, but if you have published it using the command `php artisan lhm:publish` and selected the middleware option, you will receive an overridden file for the same middleware. In such cases, it's necessary to manually register the middleware. To do so, follow these steps in the `app\Http\Kernel.php` file:
+
+```php
+  // ...
+
+    protected $routeMiddleware = [
+        // ...
+      
+        'custom-authorize' => \App\Http\Middleware\Custom\AuthorizationMiddleware::class,
+    ];
+```
+
 #### Example
 
 ```php
@@ -195,6 +226,9 @@ use \AbdullahMateen\LaravelHelpingMaterial\Enums\User\RoleEnum;
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('authorize:1001,3001')
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('authorize:' . RoleEnum::column('value', 'admins', true))
+
+// if you have published it 
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('custom-authorize:1001,3001')
 ```
 
 > take a look at AuthorizationMiddleware [here](https://github.com/AbdullahMateen/laravel-helping-metarial/tree/1.x/src/Helpers)
@@ -239,10 +273,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('aut
 
 [(Back to top)](#table-of-contents)
 
-* **Abdullah Mateen** - *Initial work* - [Abdullah Mateen](https://github.com/AbdullahMateen/laravel-helping-metarial)
+* **[Abdullah Mateen](https://github.com/AbdullahMateen/laravel-helping-metarial)** - *abdulahmateen101@gmail.com* 
 
 ## License
 
 [(Back to top)](#table-of-contents)
 
-The MIT License (MIT) 2024 - [Abdullah Mateen](https://github.com/AbdullahMateen/laravel-helping-metarial). Please have a look at the [LICENSE.md](LICENSE.md) for more details.
+The MIT License (MIT) 2024 - [Abdullah Mateen](https://github.com/AbdullahMateen/laravel-helping-metarial). Please have a look at the [LICENSE.md](./LICENSE) for more details.
