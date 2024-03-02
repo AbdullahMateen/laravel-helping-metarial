@@ -169,9 +169,9 @@ if (!function_exists('auth_user')) {
     /**
      * @param string|null $guard
      *
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     * @return \Illuminate\Contracts\Auth\Authenticatable|\App\Models\User|null
      */
-    function auth_user(?string $guard = null): ?\Illuminate\Contracts\Auth\Authenticatable
+    function auth_user(?string $guard = null): \Illuminate\Contracts\Auth\Authenticatable|\App\Models\User|null
     {
         try {
             return auth($guard)->user();

@@ -11,8 +11,7 @@ trait GeneralTrait
         if ($name === 'key') {
             return $this->name;
         }
-        // $getter = 'get' . ucfirst($name);
-        // if (method_exists($this, $getter)) return $this->$getter(...$arguments);
+
         return null;
     }
 
@@ -72,9 +71,10 @@ trait GeneralTrait
      *
      * @return mixed
      */
-    public static function random(string $type = 'value', string $function = 'cases'): mixed
+    public static function random(string|null $type = 'value', string $function = 'cases'): mixed
     {
-        return self::$function()[array_rand(self::$function())]->$type;
+        $enum = self::$function()[array_rand(self::$function())];
+        return is_null($type) ? $enum : $enum->$type;
     }
 
     public static function toArray(bool $useToStringValue = false, $function = 'cases'): array
@@ -144,6 +144,19 @@ trait GeneralTrait
     public function equalsTo(mixed $value, string $type = 'value', bool $strict = false): bool
     {
         return $strict ? $this->$type === $value : $this->$type == $value;
+    }
+
+    /**
+     * @return array
+     */
+    public function array(): array
+    {
+        return [
+            'value'     => $this->value,
+            'name'      => $this->toString(),
+            'color'     => $this->color(),
+            'colorCode' => $this->colorCode(),
+        ];
     }
 
     /**
